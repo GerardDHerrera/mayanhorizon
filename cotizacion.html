@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Propuesta Comercial - Terrenos Tulum</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Estilos generales del cuerpo y fuentes */
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-color: #FDFBF8;
+      color: #3A3A3A;
+    }
+    /* Imagen de fondo para la sección hero */
+    .hero-bg {
+      background-image: url('https://images.unsplash.com/photo-1507525428034-b723a9ce6890?q=80&w=2070&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+    }
+    /* Relleno consistente para las secciones principales */
+    .section-padding {
+      padding: 5rem 1.5rem;
+    }
+    /* Contenedor del mapa 3D */
+    .map-container {
+      width: 100%;
+      height: 550px;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    }
+    /* Estilos para inputs y selects de formulario */
+    .currency-input, .currency-select, .property-select {
+      border: 1px solid #D1D5DB;
+      border-radius: 0.375rem;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      width: 100%;
+      background-color: #FFFFFF;
+    }
+    .currency-input:focus, .currency-select:focus, .property-select:focus {
+      border-color: #A67B5B;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(166, 123, 91, 0.2);
+    }
+
+    /* Estilos específicos para el botón flotante de WhatsApp */
+    .whatsapp-float-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999; /* Asegura que esté sobre otros elementos */
+      cursor: pointer;
+    }
+
+    .whatsapp-float-btn img {
+      width: 64px; /* Tamaño del icono */
+      height: 64px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .whatsapp-float-btn img:hover {
+      transform: scale(1.1); /* Efecto de crecimiento al pasar el mouse */
+    }
+
+    /* Estilos para el modal de chat de WhatsApp */
+    .whatsapp-chat-modal {
+      position: fixed;
+      bottom: 100px; /* Ajusta la posición para que esté encima del botón */
+      right: 24px;
+      background-color: #fff;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      width: 300px;
+      z-index: 998; /* Un poco menos que el botón para que este quede "debajo" visualmente */
+      overflow: hidden;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      transform-origin: bottom right;
+    }
+    .whatsapp-chat-modal.hidden {
+      opacity: 0;
+      transform: scale(0.8);
+      pointer-events: none; /* Deshabilita interacciones cuando está oculto */
+    }
+    .whatsapp-chat-header {
+      background-color: #25D366; /* Color verde de WhatsApp */
+      color: white;
+      padding: 1rem;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top-left-radius: 0.75rem;
+      border-top-right-radius: 0.75rem;
+    }
+    .whatsapp-chat-body {
+      padding: 1rem;
+      color: #3A3A3A;
+    }
+    .whatsapp-chat-footer {
+      padding: 1rem;
+      border-top: 1px solid #E5E7EB;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* Estilos para la tabla de propiedades dinámicas */
+    .property-table-container {
+      background-color: #FDFBF8;
+      border-radius: 0.75rem;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      overflow: hidden; /* Para que las esquinas redondeadas apliquen bien */
+      margin-top: 2rem;
+    }
+
+    .property-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .property-table thead th {
+      background-color: #A67B5B; /* Color del encabezado de la tabla */
+      color: white;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid #8e6a4d;
+    }
+
+    .property-table tbody tr {
+      border-bottom: 1px solid #E5E7EB;
+      transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .property-table tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    .property-table tbody tr:hover {
+      background-color: #F0F0F0; /* Fondo al pasar el cursor */
+      transform: translateY(-2px); /* Pequeño levantamiento */
+      box-shadow: 0 4px 8px rgba(0,0,0,0.08); /* Sombra al pasar el cursor */
+    }
+
+    .property-table tbody td {
+      padding: 0.75rem 1rem;
+      color: #3A3A3A;
+    }
+
+    /* Animación para simular "movimiento de datos" */
+    @keyframes data-flow {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      25% {
+        transform: translateY(-2px) scale(1.005);
+        opacity: 0.98;
+      }
+      50% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      75% {
+        transform: translateY(2px) scale(0.995);
+        opacity: 0.98;
+      }
+    }
+
+    .property-table tbody tr:nth-child(even) {
+      animation: data-flow 10s infinite ease-in-out;
+      animation-delay: 0s;
+    }
+    .property-table tbody tr:nth-child(odd) {
+      animation: data-flow 10s infinite ease-in-out;
+      animation-delay: 2s; /* Retraso para un efecto escalonado */
+    }
+
+    /* Estilo para el efecto de máquina de escribir */
+    .typewriter-text {
+      font-family: 'Courier New', Courier, monospace; /* Fuente de estilo máquina de escribir */
+      display: inline-block; /* Necesario para la animación de cursor */
+      overflow: hidden; /* Oculta el texto que aún no se ha "escrito" */
+      white-space: nowrap; /* Evita que el texto se envuelva */
+      border-right: 0.15em solid #A67B5B; /* Simula el cursor de escritura */
+      animation: typing 2s steps(40, end), blink-caret 0.75s step-end infinite;
+      width: 0; /* Inicialmente 0 para la animación */
+    }
+
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: #A67B5B; }
+    }
+  </style>
+</head>
+<body id="experiencia2" class="antialiased">
+
+<header class="bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-md">
+  <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="text-3xl font-bold text-[#3A3A3A]">Cotización <span class="text-[#A67B5B]"><br>Landing Page</span></div>
+    <div class="hidden md:flex space-x-6 items-center">
+      <a href="#experiencia" class="hover:text-[#A67B5B] transition-colors">La Experiencia</a>
+      <a href="#eficiencia" class="hover:text-[#A67B5B] transition-colors">Eficiencia Operativa</a>
+      <a href="#inversion" class="hover:text-[#A67B5B] transition-colors">Inversión</a>
+      <button id="agendar-presentacion-header" class="bg-[#A67B5B] text-white px-5 py-2.5 rounded-xl hover:bg-[#8e6a4d] transition-colors shadow-lg">Agendar Presentación</button>
+    </div>
+    <button id="mobile-menu-button" class="md:hidden text-3xl text-[#3A3A3A]">☰</button>
+  </nav>
+  <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 space-y-3 text-center">
+    <a href="#experiencia" class="block text-lg hover:text-[#A67B5B] transition-colors">La Experiencia</a>
+    <a href="#eficiencia" class="block text-lg hover:text-[#A67B5B] transition-colors">Eficiencia Operativa</a>
+    <a href="#inversion" class="block text-lg hover:text-[#A67B5B] transition-colors">Inversión</a>
+    <button id="agendar-presentacion-mobile" class="block bg-[#A67B5B] text-white px-5 py-2.5 rounded-xl hover:bg-[#8e6a4d] transition-colors mt-4">Agendar Presentación</button>
+  </div>
+  <!-- Reproductor de audio -->
+  <audio id="audio-presentacion" controls class="w-full bg-gray-200 p-2 rounded-b-lg">
+    <source src="audio1.mp3" type="audio/mpeg">
+    Tu navegador no soporta el elemento de audio.
+  </audio>
+</header>
+
+<main>
+  <!-- Hero Section -->
+  <section class="hero-bg text-white min-h-[85vh] flex items-center justify-center text-center relative">
+    <div class="bg-black/60 absolute w-full h-full"></div>
+    <div class="container mx-auto px-8 relative z-10">
+      <h1 class="text-5xl md:text-7xl font-extrabold leading-tight mb-6 animate-fade-in-up">
+        Cotización de Plataforma <span class="text-[#A67B5B]">Inteligente</span><br> para Terrenos Tulum
+      </h1>
+      <p class="text-xl md:text-2xl max-w-3xl mx-auto mb-10 opacity-90 animate-fade-in-down">
+        Transformamos la venta de terrenos en Tulum en una **experiencia interactiva y transparente**, diseñada para cautivar a los clientes más exigentes y optimizar su proceso de inversión.
+      </p>
+      <div class="flex flex-col sm:flex-row justify-center items-center space-y-5 sm:space-y-0 sm:space-x-6">
+        <a href="#experiencia" class="bg-[#A67B5B] text-white font-bold py-3.5 px-10 rounded-xl text-xl hover:bg-[#8e6a4d] transition-transform transform hover:scale-105 shadow-xl w-full sm:w-auto">
+          Descubra la Experiencia
+        </a>
+        <a href="#inversion" class="border-2 border-white text-white font-bold py-3.5 px-10 rounded-xl text-xl hover:bg-white hover:text-[#A67B5B] transition-colors transform hover:scale-105 w-full sm:w-auto">
+          Ver Cotización Detallada
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experiencia Section -->
+  <section id="experiencia" class="section-padding bg-white">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-[#3A3A3A] mb-4">El Core de la Experiencia Premier: Tecnología y Confianza</h2>
+        <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+          Nuestra propuesta integra funcionalidades que transforman la visualización de la inversión en una experiencia interactiva y altamente informativa.
+        </p>
+      </div>
+
+      <!-- Mapas 3D y Recorridos Inmersivos -->
+      <div id="map-section" class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+        <div class="lg:order-2 map-container">
+          <div id="google-map-3d" class="w-full h-full"></div>
+          <div class="mt-4 flex flex-wrap justify-center gap-3">
+            <button id="stop-start-rotation-btn" class="px-4 py-2 bg-[#A67B5B] text-white rounded-lg hover:bg-[#8e6a4d] transition-colors text-base shadow-md">
+              Detener Rotación Automática
+            </button>
+          </div>
+        </div>
+        <div class="lg:order-1 text-center lg:text-left">
+          <h3 class="text-3xl font-bold text-[#A67B5B] mb-5">Mapas 3D con Recorridos Inmersivos de Alto Impacto</h3>
+          <p class="text-lg text-gray-700 leading-relaxed mb-6">
+            Imagina a sus clientes explorando **cualquier rincón del mundo con una fluidez asombrosa**, no solo Tulum. Hemos desarrollado una integración de mapas 3D que permite **rotar, inclinar y acercarse** a ubicaciones clave con la precisión y el detalle de un dron. Nuestro **recorrido virtual 'demo'** iniciará al abrir la página, llevándolos en un 'vuelo' sobre una **ubicación icónica y deslumbrante a nivel mundial**, demostrando el potencial ilimitado de cómo presentarán sus propias propiedades.
+          </p>
+          <p class="text-lg text-gray-700 leading-relaxed">
+            Esta tecnología no es solo 'bonita'; es una **ingeniería sofisticada** que eleva su oferta visual muy por encima de la competencia, permitiendo una inmersión y una comprensión espacial inigualables.
+          </p>
+          <p class="text-sm text-gray-500 mt-4">
+            **Nota:** La calidad de la imagen satelital y la disponibilidad de la vista 3D en alta definición dependen de las modernizaciones y cobertura de Google Maps en cada región.
+          </p>
+        </div>
+      </div>
+
+      <!-- Dominio Bilingüe Nativo y Transparencia Financiera Global (Convertidor de Divisas) -->
+      <div id="currency-converter-section" class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+          <div class="bg-[#FDFBF8] p-8 rounded-xl shadow-lg">
+              <h4 class="text-2xl font-semibold text-[#3A3A3A] mb-6 text-center">Convertidor de Divisas (Demo)</h4>
+              <div class="space-y-6">
+                  <div>
+                      <label for="amount-from" class="block text-gray-700 text-sm font-medium mb-2">Cantidad</label>
+                      <input type="number" id="amount-from" value="1000" min="0" class="currency-input">
+                  </div>
+                  <div class="flex space-x-4">
+                      <div class="flex-1">
+                          <label for="currency-from" class="block text-gray-700 text-sm font-medium mb-2">De</label>
+                          <select id="currency-from" class="currency-select">
+                              <option value="USD">USD - Dólar Estadounidense</option>
+                              <option value="MXN">MXN - Peso Mexicano</option>
+                              <option value="EUR">EUR - Euro</option>
+                              <option value="CAD">CAD - Dólar Canadiense</option>
+                          </select>
+                      </div>
+                      <div class="flex-1">
+                          <label for="currency-to" class="block text-gray-700 text-sm font-medium mb-2">A</label>
+                          <select id="currency-to" class="currency-select">
+                              <option value="MXN">MXN - Peso Mexicano</option>
+                              <option value="USD">USD - Dólar Estadounidense</option>
+                              <option value="EUR">EUR - Euro</option>
+                              <option value="CAD">CAD - Dólar Canadiense</option>
+                          </select>
+                      </div>
+                  </div>
+                  <div>
+                      <label for="amount-to" class="block text-gray-700 text-sm font-medium mb-2">Resultado</label>
+                      <input type="text" id="amount-to" readonly class="currency-input bg-gray-100 cursor-not-allowed">
+                  </div>
+                  <p class="text-sm text-center text-gray-500 mt-4">
+                      <strong class="text-red-500">Nota:</strong> Estas tasas son de demostración. En la plataforma final, se actualizarán en tiempo real.
+                  </p>
+              </div>
+          </div>
+          <div class="text-center lg:text-left">
+              <h3 class="text-3xl font-bold text-[#A67B5B] mb-5">Dominio Bilingüe Nativo y Transparencia Financiera Global</h3>
+              <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                  Sabemos que sus clientes son globales y con un perfil técnico exigente. Por ello, la plataforma será **completamente bilingüe (Español e Inglés)** desde su concepción, garantizando una comunicación fluida y profesional sin barreras. La construcción de esta plataforma se ha realizado bajo **estándares de desarrollo de clase mundial**, garantizando no solo una interfaz bilingüe fluida, sino una arquitectura robusta y escalable que optimizará el rendimiento global y la futura integración de innovaciones.
+              </p>
+              <p class="text-lg text-gray-700 leading-relaxed">
+                  Adicionalmente, integramos un **conversor de divisas inteligente**, diseñado para ofrecer **tasas de cambio 'demo'** al momento de la presentación, con la garantía de que, una vez implementado, se conectará a fuentes de datos en tiempo real para proporcionar la información financiera más actualizada. Esta funcionalidad no solo es un detalle técnico, sino una **herramienta estratégica** que simplifica la decisión de compra para sus inversores internacionales, mostrándoles el valor exacto en su moneda.
+              </p>
+          </div>
+      </div>
+
+
+      <!-- Buscador de Propiedades (Demostración) -->
+      <div id="property-search-section" class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-20">
+        <div class="bg-[#FDFBF8] p-8 rounded-xl shadow-lg">
+          <h4 class="text-2xl font-semibold text-[#3A3A3A] mb-6 text-center">Buscador de Propiedades (Demostración)</h4>
+          <div class="space-y-6">
+            <div>
+              <label for="property-select" class="block text-gray-700 text-sm font-medium mb-2">Selecciona una propiedad</label>
+              <select id="property-select" class="property-select">
+                <option value="tulum-jungle-retreat">Terreno Exclusivo Tulum (Jungle Retreat)</option>
+                <option value="akumal-beachfront">Lote Akumal (Frente de Playa)</option>
+                <option value="playa-del-carmen-downtown">Terreno Comercial Playa del Carmen (Centro)</option>
+              </select>
+            </div>
+            <div id="property-details" class="bg-white p-5 rounded-lg border border-gray-200">
+              <!-- Propiedad seleccionada se cargará aquí -->
+            </div>
+            <p class="text-sm text-center text-gray-500 mt-4">
+              Esta es una demostración de cómo se integraría su base de datos de propiedades, permitiendo a sus clientes filtrar y ver detalles al instante.
+            </p>
+          </div>
+        </div>
+        
+        <!-- Herramientas Estratégicas y Cápsula del Tiempo -->
+        <div class="grid grid-cols-1 gap-12">
+            <div class="text-center lg:text-left bg-[#FDFBF8] p-8 rounded-xl shadow-lg">
+                <h3 class="text-3xl font-bold text-[#A67B5B] mb-5">Herramientas Estratégicas de Análisis para el Inversor</h3>
+                <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                    Más allá de la visualización, la plataforma empodera al cliente con información clave:
+                </p>
+                <ul class="text-gray-700 text-left space-y-3 mb-8 pl-5 list-disc">
+                    <li>Un **simulador de Retorno de Inversión (ROI)**: Sus clientes podrán ajustar variables y ver proyecciones realistas del crecimiento de su patrimonio.</li>
+                    <li>
+                        <h4 class="text-xl font-semibold mb-2">Simulador de ROI (Demo):</h4>
+                        <p class="text-gray-700">Inversión Inicial: <span class="font-bold">$2,000,000.00</span></p>
+                        <p class="text-gray-700">Horizonte de Inversión: <span class="font-bold">10 Años</span></p>
+                        <p class="text-gray-700">Valor Proyectado: <span class="font-bold text-green-600">$6,211,696.42</span></p>
+                        <p class="text-gray-700">Retorno Total de Inversión: <span class="font-bold text-green-600">210.58%</span></p>
+                        <div class="mt-4 w-full max-w-xs mx-auto h-24">
+                            <canvas id="roiMiniChart"></canvas>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">
+                            (Estos son valores fijos de demostración. La versión completa será interactiva y personalizable con gráficos dinámicos).
+                        </p>
+                    </li>
+                    <li>Calculadora de costos de transacción.</li>
+                </ul>
+            </div>
+            <div class="text-center lg:text-left bg-[#FDFBF8] p-8 rounded-xl shadow-lg">
+                <h3 class="text-3xl font-bold text-[#A67B5B] mb-5">La Cápsula del Tiempo de Inversión (El Factor Sorpresa)</h3>
+                <p class="text-lg text-gray-700 leading-relaxed mb-6">
+                    Para un impacto verdaderamente memorable, incluimos la 'Cápsula del Tiempo de Inversión'. Sus clientes podrán seleccionar un año pasado y un monto inicial para descubrir **cuánto valdría esa inversión hoy** en Tulum.
+                </p>
+                <p class="text-lg text-gray-700 leading-relaxed">
+                    Es una demostración sencilla pero poderosa del **historial de plusvalía y el potencial futuro**, construyendo una conexión emocional irrefutable con la trayectoria de éxito de la región.
+                </p>
+            </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Eficiencia Section -->
+  <section id="eficiencia" class="section-padding bg-gray-100">
+    <div class="container mx-auto px-6 text-center">
+      <!-- Título de la sección mejorado -->
+      <h2 class="text-4xl font-bold text-[#3A3A3A] mb-4">
+        <span class="text-[#A67B5B]">Eficiencia Operativa</span>:<br>Gestión de Propiedades y Clientes
+      </h2>
+      <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
+        La plataforma no es solo una cara bonita. Está diseñada con una **estructura robusta para la gestión futura de su base de datos de clientes y propiedades**. Aquí puedes ver un adelanto de cómo tus datos cobrarán vida.
+      </p>
+
+      <!-- Tabla de Propiedades Dinámicas -->
+      <div class="property-table-container max-w-4xl mx-auto">
+        <table class="property-table">
+          <thead>
+            <tr>
+              <th>ID Propiedad</th>
+              <th>Nombre</th>
+              <th>Ubicación</th>
+              <th>Estado</th>
+              <th>Agente Asignado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="typewriter-cell" data-full-text="PROP-001"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Lote Selva Escondida"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Tulum Selva"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Activo"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Ana Robles"></span></td>
+            </tr>
+            <tr>
+              <td><span class="typewriter-cell" data-full-text="PROP-002"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Frente de Playa Akumal"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Akumal"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Pendiente"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Carlos Gómez"></span></td>
+            </tr>
+            <tr>
+              <td><span class="typewriter-cell" data-full-text="PROP-003"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Terreno Comercial Centro"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Playa del Carmen"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Vendido"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Laura Pérez"></span></td>
+            </tr>
+            <tr>
+              <td><span class="typewriter-cell" data-full-text="PROP-004"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Lote Ecológico Tulum"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Tulum Zona Eco"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Activo"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Ana Robles"></span></td>
+            </tr>
+            <tr>
+              <td><span class="typewriter-cell" data-full-text="PROP-005"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Vista Mar Caribe"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Puerto Morelos"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Reservado"></span></td>
+              <td><span class="typewriter-cell" data-full-text="Carlos Gómez"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="text-xl text-gray-700 leading-relaxed mt-8 max-w-4xl mx-auto">
+        Esto significa que tendrán una herramienta centralizada para **organizar contactos, rastrear intereses, y mantener su inventario al día**, permitiéndoles una **operación más eficiente y enfocada en el cierre de ventas**. Liberando tiempo valioso para lo que mejor saben hacer: **construir relaciones y cerrar negocios exitosos**.
+      </p>
+    </div>
+  </section>
+
+  <!-- Inversión Section -->
+  <section id="inversion" class="section-padding bg-white text-center">
+    <div class="container mx-auto px-6">
+      <h2 class="text-4xl font-bold text-[#3A3A3A] mb-4">Inversión Escalable y Estratégica</h2>
+      <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-12">
+        Proponemos una colaboración en fases para maximizar el valor y alinear la inversión con sus objetivos, garantizando un retorno excepcional.
+      </p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+        <!-- Fase 1 Card -->
+        <div class="bg-[#FDFBF8] p-8 rounded-xl shadow-xl flex flex-col justify-between border-t-4 border-[#A67B5B]">
+          <div  id="experiencia3">
+            <h3 class="text-3xl font-bold text-[#A67B5B] mb-4">Fase 1: Plataforma Básica + Herramientas Estratégicas</h3>
+            <p class="text-lg text-gray-700 mb-6">
+              Esta fase sienta las bases digitales con una presencia profesional y las herramientas esenciales para empezar a cualificar leads. Incluye:
+            </p>
+            <ul class="text-gray-700 text-left space-y-3 mb-8 pl-5 list-disc">
+              <li>Diseño web bilingüe responsivo (Español/Inglés).</li>
+              <li>Secciones básicas y catálogo de propiedades.</li>
+              <li>**Impresionante mapa 3D con rotación automática** (con ubicación global demo).</li>
+              <li>**Conversor de divisas (modo demo)** para transparencia financiera.</li>
+              <li>Un **simulador de Retorno de Inversión (ROI)** para proyecciones realistas.</li>
+              <li>Calculadora de costos de transacción.</li>
+            </ul>
+          </div>
+          <div class="text-center mt-auto">
+            <p class="text-4xl font-extrabold text-[#3A3A3A] mb-2">6,000 <span class="text-2xl">MXN</span></p>
+            <p class="text-sm text-gray-500 mb-4">
+              (No incluye: hosting, dominio, ni costos de APIs/servicios de terceros futuros fuera de demo).
+            </p>
+            <p class="text-base text-gray-600 font-semibold mb-4">
+              Tiempo de Implementación: <span class="text-[#A67B5B]">20 a 30 días naturales</span>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Fase 2 Card -->
+        <div class="bg-[#FDFBF8] p-8 rounded-xl shadow-xl flex flex-col justify-between border-t-4 border-[#5B7B9E]">
+          <div>
+            <h3 class="text-3xl font-bold text-[#5B7B9E] mb-4">Fase 2: Experiencia de Inmersión 3D Premier</h3>
+            <p class="text-lg text-gray-700 mb-6">
+              Aquí es donde elevamos la experiencia con funcionalidades que los diferenciarán radicalmente en el mercado. Incluye:
+            </p>
+            <ul class="text-gray-700 text-left space-y-3 mb-8 pl-5 list-disc">
+              <li>Integración de **recorridos virtuales avanzados 'estilo dron'** sobre propiedades específicas de Tulum.</li>
+              <li>La innovadora **'Cápsula del Tiempo de Inversión'** para mostrar el historial de plusvalía.</li>
+              <li>Funcionalidades de experiencia inmersiva 3D detalladas.</li>
+            </ul>
+          </div>
+          <div id="experiencia4" class="text-center mt-auto">
+            <p class="text-4xl font-extrabold text-[#3A3A3A] mb-2">10,000 <span class="text-2xl">MXN</span> (Adicionales)</p>
+            <p class="text-sm text-gray-500 mb-4">
+              (Total: 16,000 MXN por ambas fases).
+            </p>
+            <p class="text-base text-gray-600 font-semibold mb-4">
+              Tiempo de Implementación: <span class="text-[#5B7B9E]">2 meses después de Fase 1</span>.
+            </p>
+          </div>
+        </div>
+      </div>
+      <p  class="text-xl text-gray-700 leading-relaxed mt-16 max-w-4xl mx-auto">
+        Consideren esta propuesta no como un gasto, sino como una **oportunidad de inversión excepcionalmente ventajosa**. Dada la sofisticación, el impacto visual y la eficiencia operativa que generará en su proceso de venta, es un costo extraordinariamente competitivo en el mercado, ofreciendo un valor que **supera con creces la inversión inicial**.
+      </p>      
+      <p id="experiencia5" class="text-xl text-gray-700 leading-relaxed mt-16 max-w-4xl mx-auto">
+         Adquirirán una **herramienta que generará oportunidades de alto valor** de forma continua.
+      </p>
+    </div>
+  </section>
+
+  <!-- Contacto Section -->
+  <section id="contacto" class="py-20 bg-gray-800 text-white text-center">
+    <div class="container mx-auto px-6">
+      <h2 class="text-4xl font-bold mb-5">Tu visión, nuestra ejecución.</h2>
+      <p class="text-xl md:text-2xl max-w-3xl mx-auto mb-10 opacity-90">
+        Están a un paso de transformar su presencia digital y potenciar sus ventas. Conéctense con nosotros para llevar su negocio al siguiente nivel.
+      </p>
+      <!-- Botón de Agendar Presentación en la sección de Contacto -->
+      <button id="agendar-presentacion-contact" class="bg-white text-[#A67B5B] font-bold py-3.5 px-10 rounded-xl text-xl hover:bg-gray-200 transition-transform transform hover:scale-105 shadow-xl">
+        Agendar Presentación Personalizada
+      </button>
+      <p class="text-sm text-gray-400 mt-4">
+        Para agendar una presentación formal o coordinar un Google Meet, utilicen este botón.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="bg-[#3A3A3A] text-white py-8 text-center">
+  <div class="container mx-auto px-6">
+    <p>&copy; 2024 Terrenos Tulum. Todos los derechos reservados.</p>
+    <p class="text-sm opacity-70 mt-2">Invierte con seguridad, invierte con los expertos.</p>
+  </div>
+</footer>
+
+<!-- Botón flotante WhatsApp -->
+<a href="#" id="btn-whatsapp" class="whatsapp-float-btn">
+  <img src="WhatsApp.png" alt="WhatsApp" class="w-16 h-16 shadow-lg rounded-full">
+</a>
+
+<!-- Modal de chat de WhatsApp -->
+<div id="whatsapp-chat" class="whatsapp-chat-modal hidden">
+  <div class="whatsapp-chat-header">
+    <span>Agendar Presentación</span>
+    <button id="close-whatsapp-chat" class="text-white text-xl font-bold leading-none">&times;</button>
+  </div>
+  <div class="whatsapp-chat-body">
+    <p class="mb-4">Haz clic en el botón de abajo para enviarnos un mensaje y agendar tu presentación.</p>
+    <p>Estaremos encantados de atenderte.</p>
+  </div>
+  <div class="whatsapp-chat-footer">
+    <a href="https://wa.me/525545828918?text=¡Hola!%20Quería%20agendar%20una%20presentación.%20¿Qué%20día%20y%20hora%20nos%20hablamos%3F" target="_blank" class="bg-[#25D366] text-white px-4 py-2 rounded-lg hover:bg-[#1DA851] transition-colors">
+      Abrir WhatsApp
+    </a>
+  </div>
+</div>
+
+<script>
+  // Mobile menu toggle
+  document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+  });
+
+  // Data de propiedades para el buscador
+  const properties = {
+    "tulum-jungle-retreat": {
+      name: "Terreno Exclusivo Tulum (Jungle Retreat)",
+      location: "Tulum, Quintana Roo (Zona de la Selva)",
+      price: "250,000 USD",
+      area: "5,000 m²",
+      features: ["Privacidad total", "Conexión a la naturaleza", "Acceso controlado", "Ideal para desarrollo ecológico"],
+      photos: ["foto1.jpg"] // Imagen actualizada
+    },
+    "akumal-beachfront": {
+      name: "Lote Akumal (Frente de Playa)",
+      location: "Akumal, Quintana Roo (Frente al Mar Caribe)",
+      price: "1,200,000 USD",
+      area: "1,500 m²",
+      features: ["Vistas panorámicas al mar", "Acceso directo a la playa", "Potencial turístico premium", "Ideal para villa de lujo"],
+      photos: ["foto2.jpg"] // Imagen actualizada
+    },
+    "playa-del-carmen-downtown": {
+      name: "Terreno Comercial Playa del Carmen (Centro)",
+      location: "Playa del Carmen, Quintana Roo (Centro, Cerca de la 5ta Avenida)",
+      price: "750,000 USD",
+      area: "800 m²",
+      features: ["Zona de alto tráfico peatonal", "Ideal para locales comerciales/restaurantes", "Cercano a hoteles y atracciones", "Alto retorno de inversión comercial"],
+      photos: ["foto3.jpg"] // Imagen actualizada
+    }
+  };
+
+  // Función para formatear moneda (ejemplo)
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 2
+    }).format(value);
+  };
+
+  // Lógica para el botón de WhatsApp y mini chat
+  const whatsappChatModal = document.getElementById('whatsapp-chat');
+  const btnWhatsapp = document.getElementById('btn-whatsapp');
+  const closeWhatsappChatBtn = document.getElementById('close-whatsapp-chat');
+
+  // Abre/cierra el modal al hacer clic en el botón flotante
+  btnWhatsapp.addEventListener('click', (e) => {
+    e.preventDefault();
+    whatsappChatModal.classList.toggle('hidden');
+  });
+
+  // Cierra el modal al hacer clic en la "X"
+  closeWhatsappChatBtn.addEventListener('click', () => {
+    whatsappChatModal.classList.add('hidden');
+  });
+
+  // Abre el modal al hacer clic en los botones "Agendar Presentación"
+  ['agendar-presentacion-header', 'agendar-presentacion-mobile', 'agendar-presentacion-contact'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.addEventListener('click', () => {
+        whatsappChatModal.classList.remove('hidden');
+      });
+    }
+  });
+
+  // Lógica del buscador de propiedades - Reordenada para mostrar foto primero
+  document.addEventListener('DOMContentLoaded', () => {
+    const propertySelect = document.getElementById('property-select');
+    const propertyDetailsDiv = document.getElementById('property-details');
+
+    function displayPropertyDetails(propertyId) {
+      const property = properties[propertyId];
+      if (property) {
+        propertyDetailsDiv.innerHTML = `
+          <h5 class="text-xl font-bold text-[#A67B5B] mb-3">${property.name}</h5>
+          <div class="flex justify-center mt-4 mb-4">
+            <img src="${property.photos[0]}" alt="${property.name}" class="w-full md:w-2/3 rounded-lg shadow-md">
+          </div>
+          <p class="text-gray-700 mb-2"><strong>Ubicación:</strong> ${property.location}</p>
+          <p class="text-gray-700 mb-2"><strong>Precio:</strong> ${property.price}</p>
+          <p class="text-gray-700 mb-4"><strong>Área:</strong> ${property.area}</p>
+          <h6 class="text-lg font-semibold text-[#3A3A3A] mb-2">Características Clave:</h6>
+          <ul class="list-disc list-inside text-gray-700 mb-4">
+            ${property.features.map(feature => `<li>${feature}</li>`).join('')}
+          </ul>
+        `;
+      } else {
+        propertyDetailsDiv.innerHTML = '<p class="text-center text-gray-500">Selecciona una propiedad para ver sus detalles.</p>';
+      }
+    }
+
+    propertySelect.addEventListener('change', (event) => {
+      displayPropertyDetails(event.target.value);
+    });
+
+    // Muestra los detalles de la propiedad inicial al cargar
+    displayPropertyDetails(propertySelect.value);
+  });
+
+  // Lógica del simulador de ROI (gráfico)
+  document.addEventListener('DOMContentLoaded', function() {
+    const roiMiniChartCtx = document.getElementById('roiMiniChart')?.getContext('2d');
+    if (roiMiniChartCtx) {
+        // Fixed values for basic ROI demo
+        const inversionInicialDemo = 2000000; // MXN
+        const aniosDemo = 10; // Years
+        const tasaAnualDemo = 1.12; // 12% annual growth
+
+        let proyeccionData = [];
+        let labels = [];
+        let valorActual = inversionInicialDemo;
+
+        for (let i = 0; i <= aniosDemo; i++) {
+            labels.push(`Año ${i}`);
+            proyeccionData.push(valorActual);
+            valorActual *= tasaAnualDemo;
+        }
+
+        new Chart(roiMiniChartCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Proyección Demo',
+                    data: proyeccionData,
+                    borderColor: '#A67B5B',
+                    backgroundColor: 'rgba(166, 123, 91, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0 // Hide points for a cleaner look
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // Hide legend for a minimal chart
+                    },
+                    tooltip: {
+                        enabled: false // Disable tooltips
+                    }
+                },
+                scales: {
+                    x: {
+                        display: false // Hide X axis
+                    },
+                    y: {
+                        display: false // Hide Y axis
+                    }
+                },
+                elements: {
+                    line: {
+                        borderWidth: 2
+                    }
+                }
+            }
+        });
+    }
+  });
+
+  // Lógica del convertidor de divisas
+  document.addEventListener('DOMContentLoaded', () => {
+    const amountFromInput = document.getElementById('amount-from');
+    const currencyFromSelect = document.getElementById('currency-from');
+    const currencyToSelect = document.getElementById('currency-to');
+    const amountToInput = document.getElementById('amount-to');
+
+    // Tasas de conversión de demostración (USD es la base)
+    const demoExchangeRates = {
+        "USD": 1.0,
+        "MXN": 17.0, // 1 USD = 17 MXN
+        "EUR": 0.92, // 1 USD = 0.92 EUR
+        "CAD": 1.35  // 1 USD = 1.35 CAD
+    };
+
+    function convertCurrency() {
+        const amount = parseFloat(amountFromInput.value);
+        const fromCurrency = currencyFromSelect.value;
+        const toCurrency = currencyToSelect.value;
+
+        if (isNaN(amount) || amount <= 0) {
+            amountToInput.value = "Entrada inválida";
+            return;
+        }
+
+        // Convertir la cantidad a USD como paso intermedio
+        const amountInUSD = amount / demoExchangeRates[fromCurrency];
+        // Convertir de USD a la moneda de destino
+        const convertedAmount = amountInUSD * demoExchangeRates[toCurrency];
+
+        amountToInput.value = new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: toCurrency,
+            minimumFractionDigits: 2
+        }).format(convertedAmount);
+    }
+
+    // Añadir event listeners
+    if (amountFromInput) amountFromInput.addEventListener('input', convertCurrency);
+    if (currencyFromSelect) currencyFromSelect.addEventListener('change', convertCurrency);
+    if (currencyToSelect) currencyToSelect.addEventListener('change', convertCurrency);
+
+    // Realizar una conversión inicial al cargar la página si los elementos existen
+    if (amountFromInput && currencyFromSelect && currencyToSelect) {
+        convertCurrency();
+    }
+  });
+
+  // Lógica para el mapa 3D de Google Maps y su rotación
+  let map;
+  let rotationInterval;
+  // Coordenadas de Manhattan, Nueva York (Times Square o Midtown para vista "extruded")
+  const NYC_MANHATTAN_COORDS = { lat: 40.7580, lng: -73.9855 }; 
+  // ¡¡IMPORTANTE!! Reemplaza 'YOUR_GOOGLE_MAPS_API_KEY' con tu clave API REAL de Google Maps.
+  // Sin una clave válida y con la API de JavaScript de Maps habilitada, el mapa no se mostrará.
+  // Usando la clave de tu archivo anterior que sí funcionaba.
+  const GOOGLE_MAPS_API_KEY = 'AIzaSyBn26o76tGltWl-S_KB9aaLzzwmmbIALjY'; 
+
+  async function initMapDemo() {
+      // Importar la librería de mapas
+      try {
+          const { Map } = await google.maps.importLibrary("maps");
+
+          map = new Map(document.getElementById("google-map-3d"), {
+              center: NYC_MANHATTAN_COORDS, // Centrado en Manhattan, NY
+              zoom: 17, // Zoom más cercano para vista de edificios
+              heading: 0, // Inicia sin rotación para una vista clara
+              tilt: 45, // Inclinación para vista 3D
+              mapId: "1a24d0ef8ab865bd50059e0e", // Asegúrate de que este Map ID es vectorial con 3D
+              mapTypeId: 'satellite', // Muestra vista satelital
+              disableDefaultUI: true, // Oculta controles por defecto
+              gestureHandling: 'cooperative' // Mejora manejo de gestos en móviles
+          });
+
+          // Iniciar rotación automática al cargar
+          startContinuousRotation();
+
+          // Event listener para el botón de stop/start rotación
+          const stopStartBtn = document.getElementById('stop-start-rotation-btn');
+          if (stopStartBtn) {
+              stopStartBtn.addEventListener('click', () => {
+                  if (rotationInterval) {
+                      stopContinuousRotation();
+                      stopStartBtn.textContent = 'Iniciar Rotación Automática';
+                      stopStartBtn.classList.remove('bg-gray-500');
+                      stopStartBtn.classList.add('bg-[#A67B5B]');
+                  } else {
+                      startContinuousRotation();
+                      stopStartBtn.textContent = 'Detener Rotación Automática';
+                      stopStartBtn.classList.remove('bg-[#A67B5B]');
+                      stopStartBtn.classList.add('bg-gray-500');
+                  }
+              });
+          }
+      } catch (error) {
+          console.error("Error al inicializar Google Maps:", error);
+          const mapDiv = document.getElementById('google-map-3d');
+          if(mapDiv) {
+            mapDiv.innerHTML = `<div class="p-4 text-center text-red-700 bg-red-100 rounded-lg">Error al cargar el mapa. Por favor, verifica tu clave API de Google Maps y asegúrate de que la 'Maps JavaScript API' esté habilitada en tu proyecto de Google Cloud.</div>`;
+          }
+      }
+  }
+
+  // Se declara globalmente para que el callback de la API de Google Maps la encuentre
+  window.initMapDemo = initMapDemo;
+
+  function startContinuousRotation() {
+      if (rotationInterval) clearInterval(rotationInterval);
+      rotationInterval = setInterval(() => {
+          let currentHeading = map.getHeading();
+          currentHeading = (currentHeading + 0.5) % 360; // Gira 0.5 grados
+          map.setHeading(currentHeading);
+      }, 50); // Rota cada 50ms para una animación suave
+  }
+
+  function stopContinuousRotation() {
+      if (rotationInterval) clearInterval(rotationInterval);
+      rotationInterval = null; // Reiniciar para poder iniciar de nuevo
+  }
+
+  // Lógica para el efecto de máquina de escribir (typewriter)
+  function typeWriter(element, text, i = 0, speed = 30) {
+      if (i < text.length) {
+          element.textContent += text.charAt(i);
+          setTimeout(() => typeWriter(element, text, i + 1, speed), speed);
+      } else {
+        // Elimina la animación del cursor al terminar de escribir
+        element.style.borderRight = 'none';
+      }
+  }
+
+  let hasTyped = false; // Bandera para asegurar que el efecto solo se ejecute una vez
+
+  // Observador para la sección de eficiencia operativa
+  const efficiencySection = document.getElementById('eficiencia');
+  if (efficiencySection) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasTyped) {
+          const cells = document.querySelectorAll('.typewriter-cell');
+          let delay = 0;
+          cells.forEach(cell => {
+            const fullText = cell.getAttribute('data-full-text');
+            cell.textContent = ''; // Limpiar contenido antes de escribir
+            setTimeout(() => {
+              typeWriter(cell, fullText);
+            }, delay);
+            delay += 100; // Pequeño retraso entre celdas para un efecto escalonado
+          });
+          hasTyped = true; // Marca como ejecutado
+          observer.disconnect(); // Desconecta el observador después de la primera ejecución
+        }
+      });
+    }, { threshold: 0.5 }); // Cuando al menos el 50% de la sección es visible
+
+    observer.observe(efficiencySection);
+  }
+
+  // Cuando la ventana esté completamente cargada
+  window.addEventListener('load', function() {
+      // Inicia la carga de Google Maps API con un callback a initMapDemo
+      // Se utiliza el async defer para cargar el script de forma no bloqueante
+      const script = document.createElement('script');
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMapDemo&libraries=maps`;
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+
+      // Lógica para el audio
+      const audio = document.getElementById("audio-presentacion");
+      audio.src = "audio1.mp3"; // Asegura que la fuente sea tu archivo
+      audio.playbackRate = 1.25; // Establece la velocidad de reproducción
+
+      audio.addEventListener("timeupdate", () => {
+        let t = audio.currentTime;
+        // Obtener la altura del encabezado dinámicamente
+        const header = document.querySelector('header');
+        const headerHeight = header ? header.offsetHeight : 0;
+        // Aumentado el offset para asegurar que las secciones bajen más y sean más visibles.
+        const scrollOffset = -120; // Un offset adicional más grande para el "bajar un poquito suave"
+
+        let targetId = '';
+
+        // Ajusta los rangos de tiempo según el contenido de tu audio
+        // Estos son ejemplos, necesitarás ajustarlos a tu audio específico
+        
+        if (t >= 1 && t < 5) { 
+          targetId = "experiencia2";
+        } 
+        else if (t >= 5 && t < 15) { 
+          targetId = "map-section";
+        } 
+        else if (t >= 15 && t < 25) { 
+          targetId = "currency-converter-section";
+        } 
+        else if (t >= 25 && t < 32) { 
+          targetId = "property-search-section";
+        }
+        else if (t >= 32 && t < 40) { 
+          targetId = "eficiencia";
+        }
+        else if (t >= 40 && t < 44) { 
+          targetId = "inversion";
+        }
+
+        else if (t >= 44 && t < 52) { 
+          targetId = "experiencia3";
+        }
+        else if (t >= 52 && t < 57) { 
+          targetId = "experiencia4";
+        }
+        else if (t >= 57 && t < 63) { 
+          targetId = "experiencia5";
+        }
+
+        if (targetId) {
+          const targetElement = document.getElementById(targetId);
+          if (targetElement) {
+            const targetOffset = targetElement.getBoundingClientRect().top + window.pageYOffset;
+            const scrollPosition = targetOffset - headerHeight - scrollOffset; 
+            window.scrollTo({
+                top: scrollPosition,
+                behavior: "smooth"
+            });
+          }
+        }
+      });
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prueba AJAX</title>
+</head>
+<body>
+    <h2>Prueba de Conexión AJAX</h2>
+    <button onclick="testConnection()">Probar Conexión</button>
+    <div id="result"></div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Cargando...</p>';
+            
+            try {
+                console.log('Intentando conectar a: properties.php');
+                const response = await fetch('properties.php');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Datos recibidos:', data);
+                
+                resultDiv.innerHTML = `
+                    <h3 style="color: green;">✅ Conexión Exitosa</h3>
+                    <p><strong>Propiedades encontradas:</strong> ${data.length}</p>
+                    <h4>Primera propiedad:</h4>
+                    <pre>${JSON.stringify(data[0], null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">❌ Error de Conexión</h3>
+                    <p><strong>Error:</strong> ${error.message}</p>
+                    <h4>Posibles soluciones:</h4>
+                    <ul>
+                        <li>Verifica que estés accediendo vía http://localhost/</li>
+                        <li>Asegúrate de que properties.php esté en el mismo directorio</li>
+                        <li>Revisa la consola del navegador (F12)</li>
+                    </ul>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

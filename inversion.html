@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terrenos Tulum - Demo API JavaScript</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #FDFBF8;
+            color: #3A3A3A;
+        }
+        .hero-bg {
+            background-image: url('https://images.unsplash.com/photo-1507525428034-b723a9ce6890?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .tab-active {
+            border-color: #A67B5B;
+            color: #A67B5B;
+            font-weight: 600;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 50%;
+            background-color: #D4C2B4;
+            border: 4px solid #FDFBF8;
+            top: 0;
+            left: -0.625rem;
+            z-index: 10;
+        }
+        .map-container {
+            width: 100%;
+            height: 500px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            position: relative; /* Added for control buttons positioning */
+        }
+        @media (min-width: 768px) {
+            .map-container {
+                height: 600px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#3A3A3A]">
+                Terrenos <span class="text-[#A67B5B]">Tulum</span>
+            </div>
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="#simulador" class="hover:text-[#A67B5B] transition-colors">Simulador ROI</a>
+                <a href="#portafolio" class="hover:text-[#A67B5B] transition-colors">Portafolio</a>
+                <a href="#perfiles" class="hover:text-[#A67B5B] transition-colors">Tu Plan</a>
+                <a href="#experiencia" class="hover:text-[#A67B5B] transition-colors">Trayectoria</a>
+                <a href="#contacto" class="bg-[#A67B5B] text-white px-4 py-2 rounded-lg hover:bg-[#8e6a4d] transition-colors">Agendar Asesoría</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-2xl">☰</button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 space-y-2">
+            <a href="#simulador" class="block hover:text-[#A67B5B] transition-colors">Simulador ROI</a>
+            <a href="#portafolio" class="block hover:text-[#A67B5B] transition-colors">Portafolio</a>
+            <a href="#perfiles" class="block hover:text-[#A67B5B] transition-colors">Tu Plan</a>
+            <a href="#experiencia" class="block hover:text-[#A67B5B] transition-colors">Trayectoria</a>
+            <a href="#contacto" class="block bg-[#A67B5B] text-white px-4 py-2 rounded-lg hover:bg-[#8e6a4d] transition-colors mt-2">Agendar Asesoría</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero-bg text-white min-h-screen flex items-center">
+            <div class="bg-black/50 w-full h-full absolute top-0 left-0"></div>
+            <div class="container mx-auto px-6 text-center relative z-10">
+                <div class="bg-[#A67B5B]/80 backdrop-blur-sm inline-block px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                    Desde 1994 - Experiencia Comprobada
+                </div>
+                <h1 class="text-4xl md:text-6xl font-bold leading-tight mb-4">30 años invirtiendo y haciendo crecer el patrimonio de nuestros clientes</h1>
+                <p class="text-xl md:text-2xl mb-8">No vendemos propiedades, construimos inversiones seguras.</p>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
+                    <a href="#simulador" class="bg-white text-[#A67B5B] font-bold py-3 px-8 rounded-lg text-lg hover:bg-gray-200 transition-transform transform hover:scale-105 w-full md:w-auto">Calcula tu Rentabilidad</a>
+                    <a href="#contacto" class="border-2 border-white text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-white hover:text-[#A67B5B] transition-colors w-full md:w-auto">Agenda Asesoría Personal</a>
+                </div>
+                <div class="mt-12">
+                    <p class="mb-4 opacity-80">Nuestros aliados estratégicos:</p>
+                    <div class="flex justify-center items-center space-x-8 grayscale opacity-60">
+                        <span class="text-2xl font-bold">BANCO ALIADO</span>
+                        <span class="text-2xl font-bold">NOTARÍA PÚBLICA</span>
+                        <span class="text-2xl font-bold">GOBIERNO</span>
+                        <span class="text-2xl font-bold">FIDEICOMISO</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="simulador" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-[#3A3A3A]">Simulador de ROI y Plusvalía</h2>
+                    <p class="text-lg text-gray-600 mt-2">Visualiza el potencial de tu inversión en la Riviera Maya. Ajusta los valores para ver una proyección realista de tu crecimiento patrimonial.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                    <div class="lg:col-span-1 space-y-6 p-6 bg-[#FDFBF8] rounded-lg shadow-md">
+                        <div>
+                            <label for="inversion" class="block font-semibold mb-2">Monto de Inversión (MXN)</label>
+                            <input type="range" id="inversion" min="500000" max="10000000" step="100000" value="2000000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#A67B5B]">
+                            <div class="text-center font-bold text-xl mt-2 text-[#A67B5B]" id="inversion-valor">$2,000,000 MXN</div>
+                        </div>
+                        <div>
+                            <label for="horizonte" class="block font-semibold mb-2">Horizonte de Inversión (Años)</label>
+                            <input type="range" id="horizonte" min="5" max="20" step="1" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#A67B5B]">
+                            <div class="text-center font-bold text-xl mt-2 text-[#A67B5B]" id="horizonte-valor">10 Años</div>
+                        </div>
+                        <div>
+                            <label for="tipo-propiedad" class="block font-semibold mb-2">Tipo de Propiedad</label>
+                            <select id="tipo-propiedad" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-[#A67B5B] focus:border-[#A67B5B]">
+                                <option value="1.12">Terreno Residencial (12% anual)</option>
+                                <option value="1.15">Terreno Comercial (15% anual)</option>
+                                <option value="1.18">Preventa Exclusiva (18% anual)</option>
+                            </select>
+                        </div>
+                        <div class="pt-4 text-center">
+                            <p class="text-gray-600">Valor Proyectado:</p>
+                            <p class="text-3xl font-bold text-green-600" id="valor-proyectado">$6,191,736.42 MXN</p>
+                            <p class="text-gray-600 mt-2">Retorno Total de Inversión:</p>
+                            <p class="text-2xl font-bold text-green-600" id="roi-total">209.59%</p>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div class="chart-container">
+                            <canvas id="roiChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="portafolio" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-[#3A3A3A]">Portafolio con API de JavaScript</h2>
+                    <p class="text-lg text-gray-600 mt-2">Explora el potencial de los mapas 3D con marcadores personalizados.</p>
+                </div>
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <div class="lg:w-1/3 p-6 bg-[#FDFBF8] rounded-lg shadow-md">
+                        <h3 class="text-2xl font-semibold mb-4 text-[#A67B5B]">Propiedades en Venta</h3>
+                        <div id="lista-propiedades" class="space-y-4 max-h-[400px] lg:max-h-[500px] overflow-y-auto pr-2">
+                            </div>
+                    </div>
+                    <div class="lg:w-2/3">
+                         <div id="map" class="map-container">
+                             </div>
+                         <div id="map-controls" class="mt-4 p-2 bg-white rounded-lg shadow-md flex flex-wrap justify-center gap-2">
+                             <button id="start-rotation-btn" class="px-3 py-1 bg-[#A67B5B] text-white rounded-lg hover:bg-[#8e6a4d] transition-colors text-sm">Iniciar Recorrido Automático</button>
+                             <button id="stop-rotation-btn" class="px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm hidden">Detener Rotación</button>
+                             <button id="start-creative-tour-btn" class="px-3 py-1 bg-[#A67B5B] text-white rounded-lg hover:bg-[#8e6a4d] transition-colors text-sm">Iniciar Recorrido Virtual por Tulum</button>
+                             <button id="toggle-street-view-btn" class="px-3 py-1 bg-[#5B7B9E] text-white rounded-lg hover:bg-[#4a637a] transition-colors text-sm">Ver Street View</button>
+                             <button id="exit-street-view-btn" class="px-3 py-1 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm hidden">Salir Street View</button>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="perfiles" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-[#3A3A3A]">Tu Perfil, Tu Plan de Inversión</h2>
+                    <p class="text-lg text-gray-600 mt-2">Entendemos que cada inversor es único. Descubre la estrategia que mejor se adapta a tus metas y estilo de vida.</p>
+                </div>
+                <div class="max-w-4xl mx-auto">
+                    <div class="flex border-b border-gray-300 mb-8">
+                        <button data-tab="jubilados" class="tab-button flex-1 py-3 text-center border-b-4 tab-active">Jubilados</button>
+                        <button data-tab="jovenes" class="tab-button flex-1 py-3 text-center border-b-4 border-transparent">Jóvenes Inversores</button>
+                        <button data-tab="internacionales" class="tab-button flex-1 py-3 text-center border-b-4 border-transparent">Internacionales</button>
+                        <button data-tab="empresarios" class="tab-button flex-1 py-3 text-center border-b-4 border-transparent">Empresarios</button>
+                    </div>
+                    <div id="tab-content">
+                        <div id="jubilados" class="tab-pane">
+                            <h3 class="text-2xl font-semibold mb-4 text-[#A67B5B]">Seguridad y Flujo de Efectivo para tu Retiro</h3>
+                            <p class="text-gray-700">Para quienes buscan disfrutar de su retiro con tranquilidad financiera, ofrecemos propiedades listas para vivir o generar rentas estables. Nos enfocamos en ubicaciones consolidadas con alta demanda de alquiler, asegurando un flujo de efectivo constante y una plusvalía segura a largo plazo. Te acompañamos en cada paso para que tu única preocupación sea disfrutar del paraíso.</p>
+                        </div>
+                        <div id="jovenes" class="tab-pane hidden">
+                            <h3 class="text-2xl font-semibold mb-4 text-[#A67B5B]">Alto Crecimiento para Construir tu Futuro</h3>
+                            <p class="text-gray-700">Si estás comenzando a construir tu patrimonio, te presentamos oportunidades en preventa y terrenos en zonas de expansión con un potencial de crecimiento exponencial. Nuestro equipo te asesora para maximizar tu inversión inicial, ofreciendo planes de financiamiento flexibles y acceso a proyectos que multiplicarán su valor en los próximos años. Es el momento de invertir en tu futuro.</p>
+                        </div>
+                        <div id="internacionales" class="tab-pane hidden">
+                            <h3 class="text-2xl font-semibold mb-4 text-[#A67B5B]">Inversión sin Fronteras, con Asesoría Experta</h3>
+                            <p class="text-gray-700">Invertir en México desde el extranjero es más fácil que nunca. Ofrecemos una guía legal completa y gestionamos fideicomisos en tu idioma para garantizar un proceso transparente y seguro. Nuestro equipo bilingüe te asiste en cada detalle, desde la selección de la propiedad hasta los trámites legales y fiscales, para para que inviertas con total confianza y sin complicaciones.</p>
+                        </div>
+                        <div id="empresarios" class="tab-pane hidden">
+                            <h3 class="text-2xl font-semibold mb-4 text-[#A67B5B]">Proyectos Estratégicos con Retorno Rápido</h3>
+                            <p class="text-gray-700">Para el inversor con visión de negocio, identificamos locales comerciales y proyectos de desarrollo con un rápido retorno de inversión. Analizamos el mercado para encontrar ubicaciones estratégicas con alto tráfico y potencial comercial. Te conectamos con nuestra red de contactos para facilitar la construcción, permisos y operación, convirtiendo tu visión en un negocio rentable.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="experiencia" class="py-20">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-[#3A3A3A]">Nuestra Experiencia es tu Mayor Activo</h2>
+                    <p class="text-lg text-gray-600 mt-2">Un recorrido por más de 30 años de compromiso, crecimiento y éxito compartido con nuestros clientes.</p>
+                </div>
+                <div class="relative max-w-2xl mx-auto">
+                    <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-[#D4C2B4]"></div>
+                    <div class="space-y-12">
+                        <div class="relative">
+                            <div class="md:flex items-center">
+                                <div class="md:w-1/2 text-center md:text-right md:pr-8">
+                                    <h3 class="text-2xl font-bold text-[#A67B5B]">1994</h3>
+                                    <p class="mt-2 text-gray-700">Nace Terrenos Tulum con la visión de ofrecer inversiones seguras en un paraíso emergente.</p>
+                                </div>
+                                <div class="md:w-1/2 mt-4 md:mt-0">
+                                    <div class="timeline-item relative pl-8 md:pl-0 md:text-left"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="md:flex flex-row-reverse items-center">
+                                <div class="md:w-1/2 text-center md:text-left md:pl-8">
+                                    <h3 class="text-2xl font-bold text-[#A67B5B]">2005</h3>
+                                    <p class="mt-2 text-gray-700">Superamos los 100 clientes satisfechos, consolidando nuestra reputación de confianza y resultados.</p>
+                                </div>
+                                <div class="md:w-1/2 mt-4 md:mt-0">
+                                    <div class="timeline-item relative pl-8 md:pl-0 md:text-right md:pr-8"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="md:flex items-center">
+                                <div class="md:w-1/2 text-center md:text-right md:pr-8">
+                                    <h3 class="text-2xl font-bold text-[#A67B5B]">2015</h3>
+                                    <p class="mt-2 text-gray-700">Expandimos operaciones a toda la Riviera Maya, firmando alianzas clave con bancos y notarios.</p>
+                                </div>
+                                <div class="md:w-1/2 mt-4 md:mt-0">
+                                    <div class="timeline-item relative pl-8 md:pl-0 md:text-left"></div>
+                                </div>
+                            </div>
+                        </div>
+                         <div class="relative">
+                            <div class="md:flex flex-row-reverse items-center">
+                                <div class="md:w-1/2 text-center md:text-left md:pl-8">
+                                    <h3 class="text-2xl font-bold text-[#A67B5B]">2024</h3>
+                                    <p class="mt-2 text-gray-700">Celebramos 30 años, con un portafolio diversificado y cientos de historias de éxito patrimonial.</p>
+                                </div>
+                                <div class="md:w-1/2 mt-4 md:mt-0">
+                                    <div class="timeline-item relative pl-8 md:pl-0 md:text-right md:pr-8"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="costos" class="py-20 bg-white">
+             <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-[#3A3A3A]">Calculadora de Costos Reales</h2>
+                    <p class="text-lg text-gray-600 mt-2">La transparencia es la base de la confianza. Calcula los costos de cierre asociados a tu inversión sin sorpresas.</p>
+                </div>
+                <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="precio-propiedad" class="block font-semibold mb-2">Precio de la Propiedad (MXN)</label>
+                            <input type="number" id="precio-propiedad" placeholder="Ej: 2,000,000" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-[#A67B5B] focus:border-[#A67B5B]">
+                        </div>
+                        <button id="calcular-costos-btn" class="w-full bg-[#A67B5B] text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-[#8e6a4d] transition-colors">Calcular Costos</button>
+                    </div>
+                    <div id="resultados-costos" class="mt-8 border-t pt-6 hidden">
+                        <h3 class="text-2xl font-semibold mb-4">Desglose de Costos Estimados:</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li class="flex justify-between"><span>Impuesto Sobre Adquisición (ISAI ~3%):</span> <span id="costo-isai" class="font-semibold"></span></li>
+                            <li class="flex justify-between"><span>Gastos Notariales (~1.5%):</span> <span id="costo-notaria" class="font-semibold"></span></li>
+                            <li class="flex justify-between"><span>Gestoría y Avalúo (~1%):</span> <span id="costo-gestoria" class="font-semibold"></span></li>
+                            <li class="flex justify-between"><span>Inscripción Registro Público (~0.5%):</span> <span id="costo-registro" class="font-semibold"></span></li>
+                        </ul>
+                        <div class="mt-6 border-t pt-4">
+                             <p class="flex justify-between text-xl font-bold"><span>Costo Total Estimado de Cierre:</span> <span id="costo-total" class="text-green-600"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="testimoniales" class="py-20 bg-[#FDFBF8]">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-bold text-[#3A3A3A]">Historias Reales, Inversiones que Conectan</h2>
+                    <p class="text-lg text-gray-600 mt-2">Descubre cómo Terrenos Tulum ha ayudado a transformar el futuro de familias a través de inversiones seguras y rentables.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center text-center">
+                        <img src="persona1.png" alt="Testimonio de Laura G." class="w-44 h-44 rounded-full object-cover mb-4 ring-4 ring-[#D4C2B4]">
+                        <p class="text-gray-700 italic mb-4">"Invertir en Tulum no solo aseguró mi futuro financiero, sino que nos dio un lugar para construir recuerdos en familia. La atención y seguridad del equipo fue insuperable."</p>
+                        <p class="font-semibold text-[#A67B5B]">- Laura G.</p>
+                        <p class="text-sm text-gray-500">Inversionista de Terrenos Residenciales</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center text-center">
+                        <img src="persona2.png" alt="Testimonio de Alejandro M." class="w-44 h-44 rounded-full object-cover mb-4 ring-4 ring-[#D4C2B4]">
+                        <p class="text-gray-700 italic mb-4">"Gracias a Terrenos Tulum, pude diversificar mis inversiones y dejar un legado para mis hijos. Su asesoría experta y transparente nos dio total confianza desde el inicio."</p>
+                        <p class="font-semibold text-[#A67B5B]">- Alejandro M.</p>
+                        <p class="text-sm text-gray-500">Empresario y Padre de Familia</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center text-center">
+                        <img src="persona3.png" alt="Testimonio de Sofía R." class="w-44 h-44 rounded-full object-cover mb-4 ring-4 ring-[#D4C2B4]">
+                        <p class="text-gray-700 italic mb-4">"El equipo de Terrenos Tulum hizo que el proceso de invertir desde el extranjero fuera increíblemente sencillo. Ahora tenemos una fuente de ingresos estable en un lugar paradisíaco."</p>
+                        <p class="font-semibold text-[#A67B5B]">- Hildegard R.</p>
+                        <p class="text-sm text-gray-500">Inversionista Internacional</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center text-center">
+                        <img src="persona4.png" alt="Testimonio de Ricardo S." class="w-44 h-44 rounded-full object-cover mb-4 ring-4 ring-[#D4C2B4]">
+                        <p class="text-gray-700 italic mb-4">"El potencial de crecimiento que me mostraron para mi terreno fue impresionante. En tan solo unos años, el valor se ha triplicado, superando todas mis expectativas."</p>
+                        <p class="font-semibold text-[#A67B5B]">- Richard S.</p>
+                        <p class="text-sm text-gray-500">Joven Inversor</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center text-center">
+                        <img src="persona5.png" alt="Testimonio de Karla V." class="w-44 h-44 rounded-full object-cover mb-4 ring-4 ring-[#D4C2B4]">
+                        <p class="text-gray-700 italic mb-4">"Al fin puedo ver mi retiro con tranquilidad. Mi inversión me asegura un flujo de efectivo constante y un patrimonio sólido para las próximas generaciones. La mejor decisión de mi vida."</p>
+                        <p class="font-semibold text-[#A67B5B]">- Karla V.</p>
+                        <p class="text-sm text-gray-500">Profesionista en Vísperas del Retiro</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center text-center">
+                        <img src="persona6.png" alt="Testimonio de Rodrigo C." class="w-44 h-44 rounded-full object-cover mb-4 ring-4 ring-[#D4C2B4]">
+                        <p class="text-gray-700 italic mb-4">"Mi proyecto comercial despegó gracias a la ubicación estratégica que me ayudaron a encontrar. Su experiencia en el mercado local es inigualable y realmente marca la diferencia."</p>
+                        <p class="font-semibold text-[#A67B5B]">- Peter C.</p>
+                        <p class="text-sm text-gray-500">Desarrollador de Proyectos</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contacto" class="py-20 bg-gray-800 text-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="text-4xl font-bold">Tu inversión, nuestra experiencia.</h2>
+                <p class="text-xl mt-4 mb-8">Da el siguiente paso para construir tu patrimonio en el paraíso. Estamos listos para asesorarte.</p>
+                <a href="#" class="bg-white text-[#A67B5B] font-bold py-3 px-8 rounded-lg text-lg hover:bg-gray-200 transition-transform transform hover:scale-105">Conéctate con un Asesor</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-[#3A3A3A] text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2024 Terrenos Tulum. Todos los derechos reservados.</p>
+            <p class="text-sm opacity-70 mt-2">Invierte con seguridad, invierte con los expertos.</p>
+        </div>
+    </footer>
+
+    <script>
+        let map;
+        let infoWindow;
+        let currentHeading = 0;
+        let rotationInterval;
+        let panorama; // Google Street View Panorama object
+        let creativeTourAnimationId; // Para el requestAnimationFrame del tour creativo
+
+        const propiedades = [
+            { 
+                id: 1, 
+                name: 'Lote Residencial Akumal (GRANDE)', 
+                type: 'residencial', 
+                lat: 20.2520, 
+                lng: -87.3072, 
+                tags: ['Alta Plusvalía', 'Preventa'], 
+                description: 'Terreno ideal para construir tu hogar o rentar, ahora muy grande para verlo bien.',
+                // Polígono GIGANTE que abarca gran parte de Akumal y más allá.
+                // Coordenadas ajustadas para estar en tierra firme, cerca de Akumal.
+                polygon: [ 
+                    { lat: 20.2800, lng: -87.4800 }, // Noroeste, bien en tierra
+                    { lat: 20.2800, lng: -87.4000 }, // Noreste, más al este, pero aún en tierra
+                    { lat: 20.2000, lng: -87.4000 }, // Sureste
+                    { lat: 20.2000, lng: -87.4800 }, // Suroeste
+                    { lat: 20.2800, lng: -87.4800 }  // Cierra el polígono
+                ],
+                streetViewCoords: { lat: 20.2520, lng: -87.3072 } 
+            },
+            { id: 2, name: 'Terreno Comercial Tulum Centro', type: 'comercial', lat: 20.2110, lng: -87.4648, tags: ['Oportunidad de Renta', 'Comercial'], description: 'Excelente para negocios, alta afluencia turística.', streetViewCoords: { lat: 20.2110, lng: -87.4648 } },
+            { id: 3, name: 'Lote Preventa Sian Kaan', type: 'preventa', lat: 20.0000, lng: -87.6000, tags: ['Preventa', 'Alto Crecimiento'], description: 'Inversión con gran potencial a largo plazo.', streetViewCoords: { lat: 20.0000, lng: -87.6000 } },
+            { id: 4, name: 'Lote Residencial Chemuyil', type: 'residencial', lat: 20.3700, lng: -87.3800, tags: ['Alta Plusvalía'], description: 'Ambiente tranquilo cerca de cenotes.', streetViewCoords: { lat: 20.3700, lng: -87.3800 } },
+            { id: 5, name: 'Terreno Comercial Playa del Carmen', type: 'comercial', lat: 20.6296, lng: -87.0739, tags: ['Comercial'], description: 'Ubicación estratégica en la zona de mayor crecimiento.', streetViewCoords: { lat: 20.6296, lng: -87.0739 } }
+        ];
+
+        async function initMap() {
+            const { Map } = await google.maps.importLibrary("maps");
+            const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+            
+            // No es necesario importar Polygon con try-catch aquí, si &libraries=drawing está en la URL,
+            // google.maps.Polygon debería estar disponible directamente.
+            
+            const tulumCenter = { lat: 20.2110, lng: -87.4648 };
+
+            map = new Map(document.getElementById("map"), {
+                center: tulumCenter,
+                zoom: 13, // Zoom inicial un poco más alejado para ver más de Tulum
+                heading: 30, // Rotación inicial
+                tilt: 45, // Inclinación para vista 3D
+                mapId: "1a24d0ef8ab865bd50059e0e", // Tu Map ID con Vista de Globo 3D
+                mapTypeId: 'satellite', // Especifica el tipo de mapa a satélite para ver la vista 3D
+                disableDefaultUI: true, // Deshabilita los controles UI por defecto para mayor limpieza
+                gestureHandling: 'cooperative' // Mejora el manejo de gestos en móviles
+            });
+
+            infoWindow = new google.maps.InfoWindow();
+            
+            // Inicializar Street View Panorama
+            panorama = map.getStreetView();
+            panorama.addListener('visible_changed', () => {
+                const isVisible = panorama.getVisible();
+                const mapControlsDiv = document.getElementById('map-controls');
+                if (isVisible) {
+                    mapControlsDiv.classList.add('hidden'); // Ocultar si Street View está visible
+                    stopContinuousRotation(); // Detener rotación si entramos en Street View
+                    stopCreativeTour(); // Detener tour creativo si entramos en Street View
+                } else {
+                    mapControlsDiv.classList.remove('hidden'); // Mostrar si Street View no está visible
+                }
+
+                document.getElementById('toggle-street-view-btn').classList.toggle('hidden', isVisible);
+                document.getElementById('exit-street-view-btn').classList.toggle('hidden', !isVisible);
+                // Ocultar botones de recorrido cuando Street View está activo
+                document.getElementById('start-rotation-btn').classList.toggle('hidden', isVisible);
+                document.getElementById('stop-rotation-btn').classList.toggle('hidden', isVisible);
+                document.getElementById('start-creative-tour-btn').classList.toggle('hidden', isVisible);
+            });
+
+            propiedades.forEach(prop => {
+                const marker = new AdvancedMarkerElement({
+                    position: { lat: prop.lat, lng: prop.lng },
+                    map: map,
+                    title: prop.name,
+                });
+                
+                // Si la propiedad tiene un polígono, dibujarlo usando google.maps.Polygon
+                // Esta es la forma correcta si la librería 'drawing' se carga vía URL.
+                if (prop.polygon) { 
+                    new google.maps.Polygon({
+                        paths: prop.polygon,
+                        strokeColor: '#A67B5B', // Color del borde (sepia)
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#A67B5B', // Color de relleno (sepia)
+                        fillOpacity: 0.35,
+                        map: map,
+                    });
+                }
+
+                marker.addListener("click", () => {
+                    infoWindow.setContent(`
+                        <div class="text-center font-semibold">
+                            <h4 class="text-lg text-[#A67B5B]">${prop.name}</h4>
+                            <p class="text-gray-700">${prop.description}</p>
+                            <p class="text-gray-500 mt-2">Latitud: ${prop.lat.toFixed(4)}, Longitud: ${prop.lng.toFixed(4)}</p>
+                            ${prop.streetViewCoords ? `<button onclick="viewStreetViewForProperty(${prop.streetViewCoords.lat}, ${prop.streetViewCoords.lng})" class="mt-3 px-3 py-1 bg-[#5B7B9E] text-white rounded-lg hover:bg-[#4a637a] text-sm">Ver en Street View</button>` : ''}
+                        </div>
+                    `);
+                    infoWindow.open(map, marker);
+                    // Mover la cámara al marcador y detener cualquier rotación o tour automático
+                    map.moveCamera({
+                        center: { lat: prop.lat, lng: prop.lng },
+                        zoom: 17, // Mantener un zoom cercano
+                        tilt: 65, // Inclinación pronunciada
+                        heading: map.getHeading() // Mantener la rotación actual
+                    });
+                    stopContinuousRotation();
+                    stopCreativeTour();
+                    // Asegurarse de que los botones de recorrido se muestren/oculten correctamente
+                    document.getElementById('start-rotation-btn').classList.remove('hidden');
+                    document.getElementById('stop-rotation-btn').classList.add('hidden');
+                    document.getElementById('start-creative-tour-btn').classList.remove('hidden');
+                });
+            });
+
+            loadPropertiesList();
+        }
+        
+        // Función para iniciar la rotación automática (giro simple)
+        function startContinuousRotation() {
+            stopCreativeTour(); // Detener cualquier tour creativo antes de iniciar la rotación simple
+            if (rotationInterval) clearInterval(rotationInterval); // Detener cualquier rotación existente
+            document.getElementById('start-rotation-btn').classList.add('hidden');
+            document.getElementById('stop-rotation-btn').classList.remove('hidden');
+            rotationInterval = setInterval(() => {
+                currentHeading = (map.getHeading() + 0.5) % 360; // Gira 0.5 grados por intervalo
+                map.setHeading(currentHeading);
+            }, 50); // Rotar cada 50ms para una animación suave
+        }
+
+        // Función para detener la rotación automática
+        function stopContinuousRotation() {
+            if (rotationInterval) clearInterval(rotationInterval);
+            document.getElementById('start-rotation-btn').classList.remove('hidden');
+            document.getElementById('stop-rotation-btn').classList.add('hidden');
+        }
+
+        // --- Funciones para el Recorrido Virtual "Chidongo Longo" ---
+        const tourSteps = [
+            // Paso 0: Vista general de Tulum (inicio)
+            { id: 'inicio-tulum', center: { lat: 20.2110, lng: -87.4648 }, zoom: 13, tilt: 45, heading: 0, duration: 3000 },
+            // Paso 1: Acercamiento al polígono grande de Akumal
+            { id: 'acercamiento-akumal', center: { lat: 20.2500, lng: -87.4500 }, zoom: 16, tilt: 75, heading: 45, duration: 4000 },
+            // Paso 2: Rotación alrededor del polígono de Akumal (5 segundos)
+            { id: 'rotacion-akumal', center: { lat: 20.2500, lng: -87.4500 }, zoom: 16, tilt: 75, heading: 45 + 360, duration: 5000 }, // Una rotación completa
+            // Paso 3: Levantarse mirando hacia el centro de Tulum y simular altura de dron
+            { id: 'vuelo-central', center: { lat: 20.2300, lng: -87.4400 }, zoom: 16, tilt: 40, heading: 120, duration: 4000 }, // Más zoom y menos tilt para simular altura
+            // Paso 4: Vuelo hacia la playa donde se vean las ruinas mayas
+            { id: 'ruinas-playa', center: { lat: 20.2160, lng: -87.4280 }, zoom: 17, tilt: 70, heading: 270, duration: 4000 },
+            // Paso 5: Regreso a la vista general de Tulum
+            { id: 'regreso-tulum', center: { lat: 20.2110, lng: -87.4648 }, zoom: 13, tilt: 45, heading: 360 + 270, duration: 3000 } // Normalizar heading si se va más allá de 360
+        ];
+
+        let currentTourStep = 0;
+        let startTime = 0;
+
+        function easeInOutQuad(t) {
+            return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        }
+
+        function animateTourStep(currentTime) {
+            if (!startTime) startTime = currentTime;
+            const elapsed = currentTime - startTime;
+            const step = tourSteps[currentTourStep];
+            // Asegurarse de que nextStep exista para la interpolación
+            const nextStep = tourSteps[currentTourStep + 1] || tourSteps[currentTourStep]; 
+
+            // Si el tiempo del paso actual ha terminado o estamos en el último paso
+            if (elapsed >= step.duration) {
+                if (currentTourStep < tourSteps.length - 1) {
+                    currentTourStep++;
+                    startTime = currentTime; // Resetear tiempo para el nuevo paso
+                    animateTourStep(currentTime); // Llamar recursivamente para el siguiente paso
+                    return;
+                } else {
+                    stopCreativeTour(); // Detener si es el último paso
+                    return;
+                }
+            }
+
+            const progress = easeInOutQuad(Math.min(elapsed / step.duration, 1));
+
+            // Calcular valores interpolados para la cámara
+            const interpolatedCenterLat = step.center.lat + (nextStep.center.lat - step.center.lat) * progress;
+            const interpolatedCenterLng = step.center.lng + (nextStep.center.lng - step.center.lng) * progress;
+            const interpolatedZoom = step.zoom + (nextStep.zoom - step.zoom) * progress;
+            const interpolatedTilt = step.tilt + (nextStep.tilt - step.tilt) * progress;
+            
+            // Para el heading, manejar la interpolación más corta
+            let startHeading = step.heading;
+            let endHeading = nextStep.heading;
+
+            // Asegurarse de que el giro sea el más corto
+            if (endHeading - startHeading > 180) {
+                endHeading -= 360;
+            } else if (endHeading - startHeading < -180) {
+                endHeading += 360;
+            }
+
+            let interpolatedHeading = startHeading + (endHeading - startHeading) * progress;
+            interpolatedHeading = (interpolatedHeading % 360 + 360) % 360; // Normalizar a 0-360
+
+
+            map.moveCamera({
+                center: { lat: interpolatedCenterLat, lng: interpolatedCenterLng },
+                zoom: interpolatedZoom,
+                tilt: interpolatedTilt,
+                heading: interpolatedHeading
+            });
+
+            creativeTourAnimationId = requestAnimationFrame(animateTourStep);
+        }
+        
+        function startCreativeTour() {
+            stopContinuousRotation(); // Detener rotación simple si está activa
+            stopCreativeTour(); // Asegurarse de que no haya otro tour activo
+
+            currentTourStep = 0;
+            startTime = 0; // Reiniciar tiempo de inicio
+            document.getElementById('start-creative-tour-btn').classList.add('hidden');
+            // Podríamos mostrar un botón de 'detener' para el tour creativo si fuera necesario.
+            // Por simplicidad, se detiene automáticamente al finalizar.
+            creativeTourAnimationId = requestAnimationFrame(animateTourStep);
+        }
+
+        function stopCreativeTour() {
+            if (creativeTourAnimationId) {
+                cancelAnimationFrame(creativeTourAnimationId);
+                creativeTourAnimationId = null;
+            }
+            document.getElementById('start-creative-tour-btn').classList.remove('hidden');
+        }
+
+
+        // Función para ver Street View para una propiedad
+        function viewStreetViewForProperty(lat, lng) {
+            const position = { lat: lat, lng: lng };
+            panorama.setPosition(position);
+            panorama.setPov({ heading: 270, pitch: 0 }); // Dirección de vista inicial
+            panorama.setVisible(true);
+            infoWindow.close(); // Cerrar la infoWindow al abrir Street View
+        }
+
+        // Asignar eventos a los botones de control de mapa
+        document.getElementById('start-rotation-btn').addEventListener('click', startContinuousRotation);
+        document.getElementById('stop-rotation-btn').addEventListener('click', stopContinuousRotation);
+        document.getElementById('start-creative-tour-btn').addEventListener('click', startCreativeTour); // Nuevo botón para el tour creativo
+        document.getElementById('toggle-street-view-btn').addEventListener('click', () => {
+            // Si el mapa ya está en Street View, salimos. Si no, entramos en Street View en el centro actual del mapa.
+            if (panorama.getVisible()) {
+                panorama.setVisible(false);
+            } else {
+                const currentCenter = map.getCenter();
+                viewStreetViewForProperty(currentCenter.lat(), currentCenter.lng());
+            }
+        });
+        document.getElementById('exit-street-view-btn').addEventListener('click', () => {
+            panorama.setVisible(false);
+        });
+
+        function loadPropertiesList() {
+            const listaPropiedadesDiv = document.getElementById('lista-propiedades');
+            listaPropiedadesDiv.innerHTML = '';
+            
+            propiedades.forEach(prop => {
+                const propertyCard = document.createElement('div');
+                propertyCard.className = 'bg-white p-4 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow border border-gray-200';
+                propertyCard.innerHTML = `
+                    <h4 class="text-lg font-semibold text-[#3A3A3A]">${prop.name}</h4>
+                    <p class="text-sm text-gray-600">${prop.description}</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        ${prop.tags.map(tag => `<span class="bg-[#D4C2B4] text-[#3A3A3A] text-xs font-medium px-2.5 py-0.5 rounded-full">${tag}</span>`).join('')}
+                    </div>
+                `;
+                propertyCard.addEventListener('click', () => {
+                    map.moveCamera({
+                        center: { lat: prop.lat, lng: prop.lng },
+                        zoom: 17, // Zoom más cercano para el click
+                        tilt: 65, // Un tilt más pronunciado para el click
+                        heading: map.getHeading() // Mantener la rotación actual al mover la cámara
+                    });
+                    stopContinuousRotation(); // Detener rotación si ya estaba activa
+                    stopCreativeTour(); // Detener tour creativo si ya estaba activo
+                });
+                listaPropiedadesDiv.appendChild(propertyCard);
+            });
+        }
+
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBn26o76tGltWl-S_KB9aaLzzwmmbIALjY&callback=initMap&libraries=marker,drawing,streetView"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            let roiChartInstance = null;
+            const inversionSlider = document.getElementById('inversion');
+            const horizonteSlider = document.getElementById('horizonte');
+            const tipoPropiedadSelect = document.getElementById('tipo-propiedad');
+            const inversionValor = document.getElementById('inversion-valor');
+            const horizonteValor = document.getElementById('horizonte-valor');
+            const valorProyectadoDisplay = document.getElementById('valor-proyectado');
+            const roiTotalDisplay = document.getElementById('roi-total');
+            const ctx = document.getElementById('roiChart').getContext('2d');
+
+            const formatCurrency = (value) => {
+                return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
+            };
+
+            function calculateAndDisplayROI() {
+                const inversionInicial = parseFloat(inversionSlider.value);
+                const anios = parseInt(horizonteSlider.value);
+                const tasaAnual = parseFloat(tipoPropiedadSelect.value);
+
+                inversionValor.textContent = formatCurrency(inversionInicial);
+                horizonteValor.textContent = `${anios} Años`;
+
+                let proyeccionData = [];
+                let labels = [];
+                let valorActual = inversionInicial;
+
+                for (let i = 0; i <= anios; i++) {
+                    labels.push(`Año ${i}`);
+                    proyeccionData.push(valorActual);
+                    valorActual *= tasaAnual;
+                }
+                
+                const valorFinal = proyeccionData[proyeccionData.length - 1];
+                const roi = ((valorFinal - inversionInicial) / inversionInicial) * 100;
+
+                valorProyectadoDisplay.textContent = formatCurrency(valorFinal);
+                roiTotalDisplay.textContent = `${roi.toFixed(2)}%`;
+
+                updateChart(labels, proyeccionData);
+            }
+
+            function updateChart(labels, data) {
+                if (roiChartInstance) {
+                    roiChartInstance.destroy();
+                }
+                roiChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valor Proyectado de Inversión',
+                            data: data,
+                            borderColor: '#A67B5B',
+                            backgroundColor: 'rgba(166, 123, 91, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += formatCurrency(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            inversionSlider.addEventListener('input', calculateAndDisplayROI);
+            horizonteSlider.addEventListener('input', calculateAndDisplayROI);
+            tipoPropiedadSelect.addEventListener('change', calculateAndDisplayROI);
+            
+            calculateAndDisplayROI();
+
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.dataset.tab;
+
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active');
+                    });
+                    button.classList.add('tab-active');
+
+                    tabPanes.forEach(pane => {
+                        if (pane.id === tabId) {
+                            pane.classList.remove('hidden');
+                        } else {
+                            pane.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
+            const calcularCostosBtn = document.getElementById('calcular-costos-btn');
+            const precioPropiedadInput = document.getElementById('precio-propiedad');
+            const resultadosCostosDiv = document.getElementById('resultados-costos');
+
+            calcularCostosBtn.addEventListener('click', () => {
+                const precio = parseFloat(precioPropiedadInput.value);
+                if (isNaN(precio) || precio <= 0) {
+                    // Reemplazado alert con una notificación personalizada o un mensaje en el DOM si es necesario
+                    console.error('Por favor, ingresa un precio de propiedad válido.');
+                    return;
+                }
+
+                const costoIsai = precio * 0.03;
+                const costoNotaria = precio * 0.015;
+                const costoGestoria = precio * 0.01;
+                const costoRegistro = precio * 0.005;
+                const costoTotal = costoIsai + costoNotaria + costoGestoria + costoRegistro;
+
+                document.getElementById('costo-isai').textContent = formatCurrency(costoIsai);
+                document.getElementById('costo-notaria').textContent = formatCurrency(costoNotaria);
+                document.getElementById('costo-gestoria').textContent = formatCurrency(costoGestoria);
+                document.getElementById('costo-registro').textContent = formatCurrency(costoRegistro);
+                document.getElementById('costo-total').textContent = formatCurrency(costoTotal);
+
+                resultadosCostosDiv.classList.remove('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

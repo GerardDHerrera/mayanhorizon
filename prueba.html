@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayan Horizon - Invierte en Tulum</title>
+    <!-- Incluye el CDN de Tailwind CSS para un estilizado rápido y profesional -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Configuración de la paleta de colores de Mayan Horizon en Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        profundoAzul: '#002F5D',
+                        piedraGris: '#4B4B4B',
+                        turquesaCaribe: '#00A8B5',
+                        oroArena: '#D4A017',
+                        selvaVerde: '#013220',
+                        fondoClaro: '#FDFBF8',
+                        // Colores adicionales para el mapa, si se necesitan variantes
+                        mapaStroke: '#A67B5B', // Color sepia para bordes de polígonos
+                        mapaFill: 'rgba(166, 123, 91, 0.35)', // Sepia semitransparente para relleno
+                        mapaButton: '#5B7B9E', // Azul grisáceo para botones del mapa
+                        mapaButtonHover: '#4a637a', // Tono más oscuro para hover
+                    },
+                    fontFamily: {
+                        // Usamos Montserrat como fuente principal, ya que se menciona en la guía
+                        montserrat: ['Montserrat', 'sans-serif'],
+                        // Incluimos otras fuentes mencionadas en la guía
+                        raleway: ['Raleway', 'sans-serif'],
+                        playfair: ['Playfair Display', 'serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <!-- Enlace a las fuentes de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Raleway:wght@300;400&family=Playfair+Display:wght@400&display=swap" rel="stylesheet">
+    <!-- Librerías de terceros -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* Estilos generales del cuerpo y fuentes, priorizando la paleta de colores de la marca */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--tw-colors-fondoClaro); /* Usando el color de Tailwind */
+            color: var(--tw-colors-piedraGris);
+        }
+
+        /* Estilo para la barra de navegación fija */
+        .ClaseHeaderBg {
+            background-color: rgba(255, 255, 255, 0.95); /* Más opaco para mejor contraste */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        /* Hero section con el fondo de video */
+        .ClaseHeroVideoContainer {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .ClaseHeroVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+
+        .ClaseHeroOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Oscurecido un poco más */
+        }
+
+        /* Animación para el filamento (divisorio de secciones) */
+        .ClaseFilamento {
+            animation: expand 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+
+        @keyframes expand {
+            0% {
+                transform: scaleX(0);
+            }
+            100% {
+                transform: scaleX(1);
+            }
+        }
+
+        /* Estilo para el efecto de máquina de escribir */
+        .ClaseTypewriterText::after {
+            content: '|';
+            animation: blinkCaret 0.75s step-end infinite;
+            display: inline-block; /* Asegura que el cursor tenga su propio espacio */
+            vertical-align: bottom; /* Alinea el cursor con el texto */
+        }
+
+        /* Animación del cursor de la máquina de escribir */
+        @keyframes blinkCaret {
+            from, to {
+                border-color: transparent;
+            }
+            50% {
+                border-color: var(--tw-colors-oroArena); /* Usar color de marca para el cursor */
+            }
+        }
+
+        /* Estilo para la sección de mapa */
+        .ClaseMapaContainer {
+            width: 100%;
+            height: 550px; /* Altura fija para el mapa */
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            margin-top: 2rem;
+            position: relative; /* Necesario para posicionar controles */
+        }
+
+        /* Estilo para la sección de filosofía con degradado */
+        .SeccionFilosofiaFondoDegradado {
+            background: linear-gradient(135deg, var(--tw-colors-profundoAzul) 0%, var(--tw-colors-turquesaCaribe) 100%);
+        }
+
+        /* Estilos para el simulador de ROI */
+        .ClaseRoiSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--tw-colors-oroArena);
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .ClaseRoiSlider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--tw-colors-oroArena);
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .ClaseRoiSelect {
+             border: 1px solid #D1D5DB;
+             border-radius: 0.375rem;
+             padding: 0.75rem 1rem;
+             font-size: 1rem;
+             width: 100%;
+             background-color: #FFFFFF;
+        }
+        .ClaseRoiSelect:focus {
+            border-color: var(--tw-colors-oroArena);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.2);
+        }
+
+        /* Estilos para el formulario de contacto */
+        .ClaseFormularioContacto input,
+        .ClaseFormularioContacto textarea {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+        }
+        .ClaseFormularioContacto input::placeholder,
+        .ClaseFormularioContacto textarea::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .ClaseFormularioContacto input:focus,
+        .ClaseFormularioContacto textarea:focus {
+            border-color: var(--tw-colors-oroArena);
+            box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.3);
+        }
+
+    </style>
+</head>
+<body class="font-montserrat text-piedraGris">
+
+    <!-- Botón de WhatsApp Flotante -->
+    <a href="https://wa.me/5219841234567" target="_blank" class="fixed bottom-6 right-6 z-50 transition-transform duration-300 hover:scale-110">
+        <img src="Imagenes/WhatsApp.png" alt="WhatsApp" class="w-16 h-16 rounded-full shadow-lg">
+    </a>
+
+    <!-- Menú de Navegación Fijo -->
+    <header id="MainHeader" class="ClaseHeaderBg fixed top-0 left-0 w-full z-40 shadow-md">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="flex items-center space-x-2">
+                <img src="Imagenes/logo.png" alt="Logo de Mayan Horizon" class="h-14"> <!-- Logo más grande -->
+            </a>
+            <div class="hidden md:flex space-x-8 text-lg font-semibold">
+                <a href="#SeccionQuienesSomos" class="text-piedraGris hover:text-oroArena transition-colors duration-300">Nosotros</a>
+                <a href="#SeccionPlusvalia" class="text-piedraGris hover:text-oroArena transition-colors duration-300">Plusvalía</a>
+                <a href="#SeccionSimuladorROI" class="text-piedraGris hover:text-oroArena transition-colors duration-300">Simulador</a>
+                <a href="#SeccionMapa" class="text-piedraGris hover:text-oroArena transition-colors duration-300">Mapa</a>
+                <a href="#SeccionPropiedades" class="text-piedraGris hover:text-oroArena transition-colors duration-300">Propiedades</a>
+                <a href="#SeccionTestimoniales" class="text-piedraGris hover:text-oroArena transition-colors duration-300">Testimonios</a>
+                <a href="#SeccionContacto" class="text-piedraGris hover:text-oroArena transition-colors duration-300">Contacto</a>
+            </div>
+            <a href="#SeccionContacto" class="hidden md:block px-6 py-2 rounded-full bg-profundoAzul text-white font-bold hover:bg-opacity-80 transition-opacity duration-300 shadow-lg">Contáctanos</a>
+        </nav>
+    </header>
+
+    <!-- Sección Principal (Hero) con Video de Fondo -->
+    <section class="ClaseHeroVideoContainer">
+        <video autoplay muted loop playsinline class="ClaseHeroVideo">
+            <source src="Videos/tulum.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+        </video>
+        <div class="ClaseHeroOverlay flex flex-col justify-center items-center text-center text-white">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-4 font-playfair">MAYAN HORIZON</h1>
+            <p class="text-xl md:text-2xl mb-8 max-w-2xl font-raleway">
+                <span class="text-oroArena font-bold">INVierte</span> donde la cultura se encuentra con el futuro
+            </p>
+            <a href="#SeccionPropiedades" class="px-8 py-4 rounded-full bg-oroArena text-white text-lg font-bold hover:bg-opacity-80 transition-opacity duration-300 shadow-lg">Ver Propiedades</a>
+        </div>
+    </section>
+
+    <!-- Filamento divisorio en azul profundo -->
+    <div class="h-2 w-full bg-profundoAzul ClaseFilamento origin-left"></div>
+
+    <!-- Sección Quiénes Somos / Nuestra Filosofía -->
+    <section id="SeccionQuienesSomos" class="py-20 SeccionFilosofiaFondoDegradado text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-6 text-white">Nuestra Filosofía</h2>
+            <p class="max-w-3xl mx-auto text-lg mb-12 ClaseTypewriterText text-gray-100" data-text="En Mayan Horizon, somos más que una inmobiliaria; somos arquitectos de sueños e inversiones en la Riviera Maya. Con un profundo conocimiento del mercado local y un compromiso inquebrantable con la transparencia, conectamos a inversionistas con oportunidades únicas en uno de los destinos más codiciados del mundo."></p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                <div class="p-6 rounded-xl shadow-lg bg-white bg-opacity-10 border border-white border-opacity-20 transform hover:scale-105 transition-transform duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-oroArena" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0L6.343 16.657m10.607-4.607a4.998 4.998 0 00-7.072 0m7.072 0l-7.072 7.072M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0L6.343 16.657m10.607-4.607a4.998 4.998 0 00-7.072 0m7.072 0l-7.072 7.072M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.828 0L6.343 16.657m10.607-4.607a4.998 4.998 0 00-7.072 0m7.072 0l-7.072 7.072M6 9H4.5M6 15H4.5M10 6.5H8.5M10 17.5H8.5M14 9H12.5M14 15H12.5M18 6.5H16.5M18 17.5H16.5" />
+                    </svg>
+                    <h3 class="text-2xl font-semibold mb-2 text-white">Experiencia Local</h3>
+                    <p class="ClaseTypewriterText text-gray-200" data-text="Contamos con un equipo de expertos que vive y respira Tulum. Conocemos cada rincón y cada oportunidad."></p>
+                </div>
+                <div class="p-6 rounded-xl shadow-lg bg-white bg-opacity-10 border border-white border-opacity-20 transform hover:scale-105 transition-transform duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-oroArena" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.007 12.007 0 002.928 12c0 3.072 1.22 5.862 3.222 7.938l-1.936 1.936a1 1 0 001.414 1.414l1.936-1.936A12.007 12.007 0 0012 21.072c3.072 0 5.862-1.22 7.938-3.222l1.936 1.936a1 1 0 001.414-1.414l-1.936-1.936A12.007 12.007 0 0021.072 12a11.955 11.955 0 01-3.04-8.618z" />
+                    </svg>
+                    <h3 class="text-2xl font-semibold mb-2 text-white">Transparencia Total</h3>
+                    <p class="ClaseTypewriterText text-gray-200" data-text="Nuestra prioridad es tu confianza. Te acompañamos en cada paso con claridad y honestidad."></p>
+                </div>
+                <div class="p-6 rounded-xl shadow-lg bg-white bg-opacity-10 border border-white border-opacity-20 transform hover:scale-105 transition-transform duration-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-oroArena" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <h3 class="text-2xl font-semibold mb-2 text-white">Proyección de Inversión</h3>
+                    <p class="ClaseTypewriterText text-gray-200" data-text="No solo vendemos terrenos, vendemos un futuro. Te ayudamos a identificar propiedades con alta plusvalía."></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filamento divisorio en azul profundo -->
+    <div class="h-2 w-full bg-profundoAzul ClaseFilamento origin-left"></div>
+
+    <!-- Sección de Simulador de ROI y Plusvalía -->
+    <section id="SeccionSimuladorROI" class="py-20 bg-fondoClaro">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-profundoAzul">Simulador de ROI y Plusvalía</h2>
+                <p class="text-lg text-piedraGris mt-2">Visualiza el potencial de tu inversión en la Riviera Maya. Ajusta los valores para ver una proyección realista de tu crecimiento patrimonial.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+                <div class="lg:col-span-1 space-y-6 p-6 bg-white rounded-lg shadow-md">
+                    <div>
+                        <label for="InversionSlider" class="block font-semibold mb-2">Monto de Inversión (MXN)</label>
+                        <input type="range" id="InversionSlider" min="500000" max="10000000" step="100000" value="2000000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer ClaseRoiSlider accent-oroArena">
+                        <div class="text-center font-bold text-xl mt-2 text-oroArena" id="InversionValor">$2,000,000 MXN</div>
+                    </div>
+                    <div>
+                        <label for="HorizonteSlider" class="block font-semibold mb-2">Horizonte de Inversión (Años)</label>
+                        <input type="range" id="HorizonteSlider" min="5" max="20" step="1" value="10" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer ClaseRoiSlider accent-oroArena">
+                        <div class="text-center font-bold text-xl mt-2 text-oroArena" id="HorizonteValor">10 Años</div>
+                    </div>
+                    <div>
+                        <label for="TipoPropiedadSelect" class="block font-semibold mb-2">Tipo de Propiedad</label>
+                        <select id="TipoPropiedadSelect" class="ClaseRoiSelect">
+                            <option value="1.12">Terreno Residencial (12% anual)</option>
+                            <option value="1.15">Terreno Comercial (15% anual)</option>
+                            <option value="1.18">Preventa Exclusiva (18% anual)</option>
+                        </select>
+                    </div>
+                    <div class="pt-4 text-center">
+                        <p class="text-piedraGris">Valor Proyectado:</p>
+                        <p class="text-3xl font-bold text-selvaVerde" id="ValorProyectado">$6,191,736.42 MXN</p>
+                        <p class="text-piedraGris mt-2">Retorno Total de Inversión:</p>
+                        <p class="text-2xl font-bold text-selvaVerde" id="RoiTotal">209.59%</p>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <div class="relative w-full h-96">
+                        <canvas id="RoiChartCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filamento divisorio en azul profundo -->
+    <div class="h-2 w-full bg-profundoAzul ClaseFilamento origin-left"></div>
+
+    <!-- Sección de Google Maps con tu API Key -->
+    <section id="SeccionMapa" class="py-20 bg-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold text-profundoAzul mb-4">Explora la Riviera Maya en 3D</h2>
+            <p class="text-xl mb-8 text-piedraGris">Descubre la ubicación estratégica de nuestras propiedades con una vista inmersiva.</p>
+            <div id="DivMapaGoogle" class="ClaseMapaContainer">
+                <!-- El mapa de Google Maps se inicializará aquí -->
+                <p class="p-4 text-center text-red-700 bg-red-100 rounded-lg absolute inset-0 flex items-center justify-center z-10 hidden" id="MapaErrorMensaje">
+                    Error al cargar el mapa. Por favor, verifica tu clave API de Google Maps y asegúrate de que la 'Maps JavaScript API' esté habilitada.
+                </p>
+            </div>
+            <div id="DivControlesMapa" class="mt-4 p-2 bg-white rounded-lg shadow-md flex flex-wrap justify-center gap-2">
+                <button id="BotonIniciarRotacion" class="px-3 py-1 bg-oroArena text-white rounded-lg hover:bg-opacity-80 transition-colors text-sm shadow-md">Iniciar Recorrido Automático</button>
+                <button id="BotonDetenerRotacion" class="px-3 py-1 bg-piedraGris text-white rounded-lg hover:bg-opacity-80 transition-colors text-sm shadow-md hidden">Detener Rotación</button>
+                <button id="BotonStreetView" class="px-3 py-1 bg-mapaButton text-white rounded-lg hover:bg-mapaButtonHover transition-colors text-sm shadow-md">Ver Street View</button>
+                <button id="BotonSalirStreetView" class="px-3 py-1 bg-piedraGris text-white rounded-lg hover:bg-opacity-80 transition-colors text-sm shadow-md hidden">Salir Street View</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filamento divisorio en azul profundo -->
+    <div class="h-2 w-full bg-profundoAzul ClaseFilamento origin-left"></div>
+
+    <!-- Sección de Propiedades con Buscador -->
+    <section id="SeccionPropiedades" class="py-20 bg-fondoClaro">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold text-profundoAzul mb-8">Nuestras Propiedades Exclusivas</h2>
+            <p class="text-xl mb-12 text-piedraGris">Encuentra la inversión perfecta en la Riviera Maya con nuestro buscador.</p>
+            
+            <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-lg mb-12">
+                <h3 class="text-2xl font-semibold text-turquesaCaribe mb-6">Encuentra tu Propiedad</h3>
+                <div class="space-y-6">
+                    <div>
+                        <label for="SelectorPropiedad" class="block text-piedraGris text-sm font-medium mb-2 text-left">Selecciona una propiedad</label>
+                        <select id="SelectorPropiedad" class="ClaseRoiSelect">
+                            <option value="tulum-jungle-retreat">Terreno Exclusivo Tulum (Jungle Retreat)</option>
+                            <option value="akumal-beachfront">Lote Akumal (Frente de Playa)</option>
+                            <option value="playa-del-carmen-downtown">Terreno Comercial Playa del Carmen (Centro)</option>
+                        </select>
+                    </div>
+                    <div id="DetallesPropiedad" class="bg-fondoClaro p-6 rounded-lg border border-gray-200 text-left">
+                        <p class="text-center text-gray-500">Selecciona una propiedad para ver sus detalles.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aquí podrías añadir un grid con todas las propiedades si es necesario, como las 3 que ya tenías -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mt-12">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 transform hover:scale-105 transition-transform duration-300">
+                    <img src="Imagenes/foto1.jpg" alt="Propiedad 1" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-profundoAzul mb-2">Lote Premium Selva</h3>
+                        <p class="text-turquesaCaribe font-bold text-lg mb-4">$350,000 USD</p>
+                        <p class="text-piedraGris mb-4">Un oasis de tranquilidad y privacidad en el corazón de la selva maya.</p>
+                        <a href="#" class="inline-block px-6 py-2 rounded-full bg-selvaVerde text-white font-semibold hover:bg-opacity-80 transition-opacity duration-300">Ver Detalles</a>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 transform hover:scale-105 transition-transform duration-300">
+                    <img src="Imagenes/foto2.jpg" alt="Propiedad 2" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-profundoAzul mb-2">Terreno Akumal</h3>
+                        <p class="text-turquesaCaribe font-bold text-lg mb-4">$850,000 USD</p>
+                        <p class="text-piedraGris mb-4">Propiedad con vista al mar y acceso a una playa privada, ideal para un resort.</p>
+                        <a href="#" class="inline-block px-6 py-2 rounded-full bg-selvaVerde text-white font-semibold hover:bg-opacity-80 transition-opacity duration-300">Ver Detalles</a>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 transform hover:scale-105 transition-transform duration-300">
+                    <img src="Imagenes/foto3.jpg" alt="Propiedad 3" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-2xl font-semibold text-profundoAzul mb-2">Lote Cerca de Tulum</h3>
+                        <p class="text-turquesaCaribe font-bold text-lg mb-4">$750,000 USD</p>
+                        <p class="text-piedraGris mb-4">Terreno cerca del centro, ideal para desarrollo comercial o residencial.</p>
+                        <a href="#" class="inline-block px-6 py-2 rounded-full bg-selvaVerde text-white font-semibold hover:bg-opacity-80 transition-opacity duration-300">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filamento divisorio en azul profundo -->
+    <div class="h-2 w-full bg-profundoAzul ClaseFilamento origin-left"></div>
+
+    <!-- Sección de Testimoniales -->
+    <section id="SeccionTestimoniales" class="py-20 bg-oroArena text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-12 text-white">Lo que dicen nuestros clientes</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Testimonial 1 -->
+                <div class="bg-white text-piedraGris p-8 rounded-lg shadow-xl flex flex-col items-center transform hover:scale-105 transition-transform duration-300">
+                    <img src="Imagenes/persona1.png" alt="Persona 1" class="w-32 h-32 rounded-full mb-4 object-cover ring-4 ring-turquesaCaribe">
+                    <p class="italic mb-4 ClaseTypewriterText TestimonioTexto" data-text="El equipo de Mayan Horizon hizo que la compra fuera increíblemente sencilla. Son profesionales y transparentes."></p>
+                    <p class="font-bold">- Ana G.</p>
+                </div>
+                <!-- Testimonial 2 -->
+                <div class="bg-white text-piedraGris p-8 rounded-lg shadow-xl flex flex-col items-center transform hover:scale-105 transition-transform duration-300">
+                    <img src="Imagenes/persona2.png" alt="Persona 2" class="w-32 h-32 rounded-full mb-4 object-cover ring-4 ring-turquesaCaribe">
+                    <p class="italic mb-4 ClaseTypewriterText TestimonioTexto" data-text="Su conocimiento del mercado en Tulum es insuperable. Me ayudaron a encontrar la propiedad perfecta para mi inversión."></p>
+                    <p class="font-bold">- Juan P.</p>
+                </div>
+                <!-- Testimonial 3 -->
+                <div class="bg-white text-piedraGris p-8 rounded-lg shadow-xl flex flex-col items-center transform hover:scale-105 transition-transform duration-300">
+                    <img src="Imagenes/persona3.png" alt="Persona 3" class="w-32 h-32 rounded-full mb-4 object-cover ring-4 ring-turquesaCaribe">
+                    <p class="italic mb-4 ClaseTypewriterText TestimonioTexto" data-text="Un servicio de lujo, desde el primer contacto hasta el cierre. Superaron todas mis expectativas."></p>
+                    <p class="font-bold">- Sofía R.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Filamento divisorio en azul profundo -->
+    <div class="h-2 w-full bg-profundoAzul ClaseFilamento origin-left"></div>
+
+    <!-- Sección de Contacto con formulario de lujo -->
+    <section id="SeccionContacto" class="py-20 bg-profundoAzul text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-4 text-white">Conéctate con el Paraíso</h2>
+            <p class="text-xl mb-8 text-gray-200">Estamos listos para hacer realidad tu inversión en Tulum.</p>
+            <div class="max-w-md mx-auto bg-white bg-opacity-10 p-8 rounded-xl shadow-2xl backdrop-blur-sm border border-white border-opacity-30">
+                <form class="flex flex-col space-y-5 ClaseFormularioContacto">
+                    <input type="text" placeholder="Tu Nombre Completo" class="p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-oroArena">
+                    <input type="email" placeholder="Tu Correo Electrónico" class="p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-oroArena">
+                    <input type="tel" placeholder="Tu Número de Teléfono (Opcional)" class="p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-oroArena">
+                    <textarea placeholder="Cuéntanos sobre tu interés..." rows="5" class="p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-oroArena"></textarea>
+                    <button type="submit" class="px-8 py-4 rounded-full bg-oroArena text-white text-lg font-bold hover:bg-opacity-90 transition-all duration-300 shadow-xl uppercase tracking-wide">
+                        Enviar Mensaje
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-piedraGris text-white py-8">
+        <div class="container mx-auto px-6 text-center text-sm">
+            <p>&copy; 2025 Mayan Horizon. Todos los derechos reservados.</p>
+            <p class="mt-2 text-gray-400">Diseñado con <span class="text-red-500">❤️</span> en la Riviera Maya.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Animación de la gráfica de plusvalía con IntersectionObserver
+            const seccionPlusvalia = document.getElementById('SeccionPlusvalia');
+            const plusvaliaChartCanvas = document.getElementById('DiagramaPlusvalia');
+            let plusvaliaChart = null;
+
+            const chartObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !plusvaliaChart) {
+                        const ctx = plusvaliaChartCanvas.getContext('2d');
+                        const data = {
+                            labels: ['2019', '2020', '2021', '2022', '2023', '2024'],
+                            datasets: [{
+                                label: 'Crecimiento Anual de Plusvalía',
+                                data: [10, 15, 20, 28, 35, 42], // Datos de plusvalía simulados
+                                borderColor: 'white',
+                                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                                tension: 0.4,
+                                borderWidth: 4,
+                                pointBackgroundColor: 'white',
+                                pointBorderColor: 'white',
+                                pointRadius: 5,
+                                fill: true
+                            }]
+                        };
+                        const config = {
+                            type: 'line',
+                            data: data,
+                            options: {
+                                responsive: true,
+                                animation: {
+                                    duration: 2000,
+                                    easing: 'easeInOutQuad',
+                                },
+                                plugins: {
+                                    legend: {
+                                        display: false,
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                let label = context.dataset.label || '';
+                                                if (label) {
+                                                    label += ': ';
+                                                }
+                                                if (context.parsed.y !== null) {
+                                                    label += `${context.parsed.y}%`;
+                                                }
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        grid: {
+                                            display: false,
+                                        },
+                                        ticks: {
+                                            color: 'white',
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: 'Año',
+                                            color: 'white'
+                                        }
+                                    },
+                                    y: {
+                                        min: 0,
+                                        max: 50,
+                                        grid: {
+                                            color: 'rgba(255, 255, 255, 0.2)',
+                                        },
+                                        ticks: {
+                                            color: 'white',
+                                            callback: function(value) {
+                                                return value + '%';
+                                            }
+                                        },
+                                        title: {
+                                            display: true,
+                                            text: 'Plusvalía (%)',
+                                            color: 'white'
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                        plusvaliaChart = new Chart(ctx, config);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            chartObserver.observe(seccionPlusvalia);
+
+            // Efecto de máquina de escribir (typewriter)
+            function iniciarTypewriter(elemento, textoCompleto, velocidad = 30) {
+                let i = 0;
+                elemento.textContent = ''; // Limpia el texto para el efecto
+                elemento.style.borderRight = '.15em solid var(--tw-colors-oroArena)'; // Muestra el cursor
+                
+                function escribir() {
+                    if (i < textoCompleto.length) {
+                        elemento.textContent += textoCompleto.charAt(i);
+                        i++;
+                        setTimeout(escribir, velocidad);
+                    } else {
+                        elemento.style.borderRight = 'none'; // Oculta el cursor al terminar
+                    }
+                }
+                escribir();
+            }
+
+            const typewriterObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const elemento = entry.target;
+                        const textoCompleto = elemento.getAttribute('data-text');
+                        if (textoCompleto && !elemento.dataset.typed) { // Evitar re-animación
+                            iniciarTypewriter(elemento, textoCompleto);
+                            elemento.dataset.typed = 'true'; // Marcar como ya animado
+                        }
+                    }
+                });
+            }, { threshold: 0.8 }); // Se activa con 80% de visibilidad del elemento
+
+            // Aplicar el observador a los textos de filosofía
+            document.querySelectorAll('.ClaseTypewriterText').forEach(elemento => {
+                typewriterObserver.observe(elemento);
+            });
+            // Aplicar el observador a los textos de testimoniales
+            document.querySelectorAll('.TestimonioTexto').forEach(elemento => {
+                typewriterObserver.observe(elemento);
+            });
+        });
+
+        // Lógica de Google Maps
+        const GOOGLEMAPSAPIKEY = 'AIzaSyBn26o76tGltWl-S_KB9aaLzzwmmbIALjY'; 
+        let mapaGoogle;
+        let rotationInterval;
+        let panorama; // Objeto de Google Street View Panorama
+
+        // Propiedades de ejemplo para el mapa
+        const propiedadesMapa = [
+            { 
+                id: 1, 
+                name: 'Lote Residencial Akumal', 
+                type: 'residencial', 
+                lat: 20.2520, 
+                lng: -87.3072, 
+                tags: ['Alta Plusvalía', 'Preventa'], 
+                description: 'Terreno ideal para construir tu hogar o rentar.',
+                polygon: [ 
+                    { lat: 20.2800, lng: -87.4800 },
+                    { lat: 20.2800, lng: -87.4000 },
+                    { lat: 20.2000, lng: -87.4000 },
+                    { lat: 20.2000, lng: -87.4800 },
+                    { lat: 20.2800, lng: -87.4800 } 
+                ],
+                streetViewCoords: { lat: 20.2520, lng: -87.3072 } 
+            },
+            { id: 2, name: 'Terreno Comercial Tulum Centro', type: 'comercial', lat: 20.2110, lng: -87.4648, tags: ['Oportunidad de Renta', 'Comercial'], description: 'Excelente para negocios, alta afluencia turística.', streetViewCoords: { lat: 20.2110, lng: -87.4648 } },
+            { id: 3, name: 'Lote Preventa Sian Kaan', type: 'preventa', lat: 20.0000, lng: -87.6000, tags: ['Preventa', 'Alto Crecimiento'], description: 'Inversión con gran potencial a largo plazo.', streetViewCoords: { lat: 20.0000, lng: -87.6000 } },
+        ];
+
+
+        async function inicializarMapaGoogle() {
+            try {
+                const { Map } = await google.maps.importLibrary("maps");
+                const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+                const tulumCenter = { lat: 20.2110, lng: -87.4648 }; // Centro en Tulum
+                let infoWindow = new google.maps.InfoWindow();
+
+
+                mapaGoogle = new Map(document.getElementById("DivMapaGoogle"), {
+                    center: tulumCenter,
+                    zoom: 13, 
+                    heading: 0, // Inicia sin rotación
+                    tilt: 45, // Inclinación para vista 3D
+                    mapId: "1a24d0ef8ab865bd50059e0e", // ID de mapa vectorial con 3D habilitado
+                    mapTypeId: 'satellite', 
+                    disableDefaultUI: true, // Ocultar controles UI por defecto
+                    gestureHandling: 'cooperative' 
+                });
+
+                panorama = mapaGoogle.getStreetView();
+                panorama.addListener('visible_changed', () => {
+                    const isVisible = panorama.getVisible();
+                    const controlesMapaDiv = document.getElementById('DivControlesMapa');
+                    if (isVisible) {
+                        controlesMapaDiv.classList.add('hidden'); 
+                        detenerRotacionAutomatica();
+                    } else {
+                        controlesMapaDiv.classList.remove('hidden'); 
+                    }
+
+                    document.getElementById('BotonStreetView').classList.toggle('hidden', isVisible);
+                    document.getElementById('BotonSalirStreetView').classList.toggle('hidden', !isVisible);
+                    document.getElementById('BotonIniciarRotacion').classList.toggle('hidden', isVisible);
+                    document.getElementById('BotonDetenerRotacion').classList.toggle('hidden', isVisible);
+                });
+
+
+                propiedadesMapa.forEach(prop => {
+                    const marker = new AdvancedMarkerElement({
+                        position: { lat: prop.lat, lng: prop.lng },
+                        map: mapaGoogle,
+                        title: prop.name,
+                    });
+
+                    if (prop.polygon) { 
+                        new google.maps.Polygon({
+                            paths: prop.polygon,
+                            strokeColor: tailwind.config.theme.extend.colors.mapaStroke, 
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: tailwind.config.theme.extend.colors.mapaFill, 
+                            fillOpacity: 0.35,
+                            map: mapaGoogle,
+                        });
+                    }
+
+                    marker.addListener("click", () => {
+                        infoWindow.setContent(`
+                            <div class="text-center font-semibold">
+                                <h4 class="text-lg text-oroArena">${prop.name}</h4>
+                                <p class="text-piedraGris">${prop.description}</p>
+                                <p class="text-gray-500 mt-2">Lat: ${prop.lat.toFixed(4)}, Lon: ${prop.lng.toFixed(4)}</p>
+                                ${prop.streetViewCoords ? `<button onclick="verStreetViewParaPropiedad(${prop.streetViewCoords.lat}, ${prop.streetViewCoords.lng})" class="mt-3 px-3 py-1 bg-mapaButton text-white rounded-lg hover:bg-mapaButtonHover text-sm">Ver en Street View</button>` : ''}
+                            </div>
+                        `);
+                        infoWindow.open(mapaGoogle, marker);
+                        mapaGoogle.moveCamera({
+                            center: { lat: prop.lat, lng: prop.lng },
+                            zoom: 17, 
+                            tilt: 65, 
+                            heading: mapaGoogle.getHeading() 
+                        });
+                        detenerRotacionAutomatica();
+                    });
+                });
+
+                iniciarRotacionAutomatica(); // Inicia la rotación automáticamente al cargar
+
+            } catch (error) {
+                console.error("Error al inicializar Google Maps:", error);
+                document.getElementById('MapaErrorMensaje').classList.remove('hidden');
+            }
+        }
+
+        window.inicializarMapaGoogle = inicializarMapaGoogle; // Hacer la función global para el callback
+
+        function iniciarRotacionAutomatica() {
+            if (rotationInterval) clearInterval(rotationInterval);
+            document.getElementById('BotonIniciarRotacion').classList.add('hidden');
+            document.getElementById('BotonDetenerRotacion').classList.remove('hidden');
+            rotationInterval = setInterval(() => {
+                let currentHeading = mapaGoogle.getHeading();
+                currentHeading = (currentHeading + 0.5) % 360; 
+                mapaGoogle.setHeading(currentHeading);
+            }, 50); 
+        }
+
+        function detenerRotacionAutomatica() {
+            if (rotationInterval) clearInterval(rotationInterval);
+            rotationInterval = null; 
+            document.getElementById('BotonIniciarRotacion').classList.remove('hidden');
+            document.getElementById('BotonDetenerRotacion').classList.add('hidden');
+        }
+
+        function verStreetViewParaPropiedad(lat, lng) {
+            const position = { lat: lat, lng: lng };
+            panorama.setPosition(position);
+            panorama.setPov({ heading: 270, pitch: 0 }); 
+            panorama.setVisible(true);
+            // Si tenías una infoWindow abierta, ciérrala
+            if (mapaGoogle.infoWindow) mapaGoogle.infoWindow.close();
+        }
+        window.verStreetViewParaPropiedad = verStreetViewParaPropiedad; // Hacer global para onClick
+
+        // Asignar eventos a los botones de control de mapa
+        document.getElementById('BotonIniciarRotacion').addEventListener('click', iniciarRotacionAutomatica);
+        document.getElementById('BotonDetenerRotacion').addEventListener('click', detenerRotacionAutomatica);
+        document.getElementById('BotonStreetView').addEventListener('click', () => {
+            if (panorama.getVisible()) {
+                panorama.setVisible(false);
+            } else {
+                const currentCenter = mapaGoogle.getCenter();
+                verStreetViewParaPropiedad(currentCenter.lat(), currentCenter.lng());
+            }
+        });
+        document.getElementById('BotonSalirStreetView').addEventListener('click', () => {
+            panorama.setVisible(false);
+        });
+        
+        // Carga el script de Google Maps API con un callback a inicializarMapaGoogle
+        const scriptGoogleMaps = document.createElement('script');
+        scriptGoogleMaps.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLEMAPSAPIKEY}&callback=inicializarMapaGoogle&libraries=maps,marker,drawing,streetView`;
+        scriptGoogleMaps.async = true;
+        scriptGoogleMaps.defer = true;
+        document.head.appendChild(scriptGoogleMaps);
+
+        // Lógica del simulador de ROI
+        document.addEventListener('DOMContentLoaded', function() {
+            let roiChartInstance = null;
+            const inversionSlider = document.getElementById('InversionSlider');
+            const horizonteSlider = document.getElementById('HorizonteSlider');
+            const tipoPropiedadSelect = document.getElementById('TipoPropiedadSelect');
+            const inversionValor = document.getElementById('InversionValor');
+            const horizonteValor = document.getElementById('HorizonteValor');
+            const valorProyectadoDisplay = document.getElementById('ValorProyectado');
+            const roiTotalDisplay = document.getElementById('RoiTotal');
+            const ctx = document.getElementById('RoiChartCanvas').getContext('2d');
+
+            const formatCurrency = (value) => {
+                return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
+            };
+
+            function calculateAndDisplayROI() {
+                const inversionInicial = parseFloat(inversionSlider.value);
+                const anios = parseInt(horizonteSlider.value);
+                const tasaAnual = parseFloat(tipoPropiedadSelect.value);
+
+                inversionValor.textContent = formatCurrency(inversionInicial);
+                horizonteValor.textContent = `${anios} Años`;
+
+                let proyeccionData = [];
+                let labels = [];
+                let valorActual = inversionInicial;
+
+                for (let i = 0; i <= anios; i++) {
+                    labels.push(`Año ${i}`);
+                    proyeccionData.push(valorActual);
+                    valorActual *= tasaAnual;
+                }
+                
+                const valorFinal = proyeccionData[proyeccionData.length - 1];
+                const roi = ((valorFinal - inversionInicial) / inversionInicial) * 100;
+
+                valorProyectadoDisplay.textContent = formatCurrency(valorFinal);
+                roiTotalDisplay.textContent = `${roi.toFixed(2)}%`;
+
+                updateChart(labels, proyeccionData);
+            }
+
+            function updateChart(labels, data) {
+                if (roiChartInstance) {
+                    roiChartInstance.destroy();
+                }
+                roiChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valor Proyectado de Inversión',
+                            data: data,
+                            borderColor: tailwind.config.theme.extend.colors.oroArena,
+                            backgroundColor: 'rgba(212, 160, 23, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: tailwind.config.theme.extend.colors.oroArena,
+                            pointBorderColor: tailwind.config.theme.extend.colors.oroArena,
+                            pointRadius: 3,
+                            hoverRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += formatCurrency(context.parsed.y);
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: tailwind.config.theme.extend.colors.piedraGris
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return formatCurrency(value);
+                                    },
+                                    color: tailwind.config.theme.extend.colors.piedraGris
+                                },
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            inversionSlider.addEventListener('input', calculateAndDisplayROI);
+            horizonteSlider.addEventListener('input', calculateAndDisplayROI);
+            tipoPropiedadSelect.addEventListener('change', calculateAndDisplayROI);
+            
+            calculateAndDisplayROI(); // Cálculo inicial
+        });
+
+        // Lógica del buscador de propiedades
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectorPropiedad = document.getElementById('SelectorPropiedad');
+            const detallesPropiedadDiv = document.getElementById('DetallesPropiedad');
+
+            // Datos de propiedades de ejemplo
+            const propiedadesDetalles = {
+                "tulum-jungle-retreat": {
+                    name: "Terreno Exclusivo Tulum (Jungle Retreat)",
+                    location: "Tulum, Quintana Roo (Zona de la Selva)",
+                    price: "250,000 USD",
+                    area: "5,000 m²",
+                    features: ["Privacidad total", "Conexión a la naturaleza", "Acceso controlado", "Ideal para desarrollo ecológico"],
+                    photos: ["Imagenes/foto1.jpg"] 
+                },
+                "akumal-beachfront": {
+                    name: "Lote Akumal (Frente de Playa)",
+                    location: "Akumal, Quintana Roo (Frente al Mar Caribe)",
+                    price: "1,200,000 USD",
+                    area: "1,500 m²",
+                    features: ["Vistas panorámicas al mar", "Acceso directo a la playa", "Potencial turístico premium", "Ideal para villa de lujo"],
+                    photos: ["Imagenes/foto2.jpg"] 
+                },
+                "playa-del-carmen-downtown": {
+                    name: "Terreno Comercial Playa del Carmen (Centro)",
+                    location: "Playa del Carmen, Quintana Roo (Centro, Cerca de la 5ta Avenida)",
+                    price: "750,000 USD",
+                    area: "800 m²",
+                    features: ["Zona de alto tráfico peatonal", "Ideal para locales comerciales/restaurantes", "Cercano a hoteles y atracciones", "Alto retorno de inversión comercial"],
+                    photos: ["Imagenes/foto3.jpg"] 
+                }
+            };
+
+            function mostrarDetallesPropiedad(propertyId) {
+                const propiedad = propiedadesDetalles[propertyId];
+                if (propiedad) {
+                    detallesPropiedadDiv.innerHTML = `
+                        <h5 class="text-xl font-bold text-oroArena mb-3">${propiedad.name}</h5>
+                        <div class="flex justify-center mt-4 mb-4">
+                            <img src="${propiedad.photos[0]}" alt="${propiedad.name}" class="w-full md:w-2/3 rounded-lg shadow-md">
+                        </div>
+                        <p class="text-piedraGris mb-2"><strong>Ubicación:</strong> ${propiedad.location}</p>
+                        <p class="text-piedraGris mb-2"><strong>Precio:</strong> ${propiedad.price}</p>
+                        <p class="text-piedraGris mb-4"><strong>Área:</strong> ${propiedad.area}</p>
+                        <h6 class="text-lg font-semibold text-profundoAzul mb-2">Características Clave:</h6>
+                        <ul class="list-disc list-inside text-piedraGris mb-4">
+                            ${propiedad.features.map(feature => `<li>${feature}</li>`).join('')}
+                        </ul>
+                    `;
+                } else {
+                    detallesPropiedadDiv.innerHTML = '<p class="text-center text-gray-500">Selecciona una propiedad para ver sus detalles.</p>';
+                }
+            }
+
+            selectorPropiedad.addEventListener('change', (event) => {
+                mostrarDetallesPropiedad(event.target.value);
+            });
+
+            // Mostrar los detalles de la primera propiedad al cargar
+            mostrarDetallesPropiedad(selectorPropiedad.value);
+        });
+    </script>
+</body>
+</html>

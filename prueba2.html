@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Listado de Propiedades</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --azul:#002F5D; --gris:#4B4B4B; --turquesa:#00A8B5; --oro:#D4A017; --bg:#FDFBF8;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Montserrat,system-ui,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--gris)}
+    header,footer{background:var(--azul);color:#fff;padding:16px}
+    header h1{margin:0;font-size:20px;color:var(--oro)}
+    main{max-width:1200px;margin:24px auto;padding:0 16px}
+    .filters{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;background:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+    .filters label{font-size:12px;display:block;margin-bottom:6px;color:#666}
+    .filters input, .filters select{width:100%;padding:10px;border:1px solid #e3e3e3;border-radius:8px;font-size:14px}
+    .filters .btn{background:var(--turquesa);color:#fff;border:none;border-radius:8px;padding:10px 12px;font-weight:700;cursor:pointer}
+    .filters .btn.clear{background:#f6f6f6;color:#333;border:1px solid #e3e3e3}
+    .count{margin:12px 4px;color:#666;font-size:14px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .card{background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow:hidden;display:flex;flex-direction:column}
+    .media{background:#f3f6f9;height:160px;display:flex;align-items:center;justify-content:center;color:#9aa4af;font-size:13px;position:relative}
+    .badge{position:absolute;top:8px;right:8px;background:var(--oro);color:#fff;font-weight:700;font-size:11px;padding:6px 8px;border-radius:999px}
+    .body{padding:14px;display:flex;flex-direction:column;gap:6px}
+    .title{font-weight:700;color:var(--azul);font-size:16px;margin:0}
+    .meta{font-size:13px;color:#5a5a5a}
+    .price{color:var(--oro);font-weight:800;font-size:18px;margin-top:6px}
+    .chip{display:inline-block;background:#eef7f8;color:#0a7d88;border:1px solid #c6ecef;font-size:11px;padding:4px 8px;border-radius:999px;margin-right:6px}
+    .footer{padding:12px 14px;border-top:1px solid #f1f1f1;display:flex;gap:8px}
+    .btn{flex:1;background:var(--turquesa);color:#fff;border:none;border-radius:8px;padding:10px 12px;font-weight:700;cursor:pointer}
+    .btn.secondary{background:#f6f6f6;color:#333;border:1px solid #e3e3e3}
+    .pagination{display:flex;gap:8px;justify-content:center;margin:18px 0}
+    .pagebtn{padding:8px 12px;border:1px solid #e3e3e3;background:#fff;border-radius:8px;cursor:pointer}
+    .pagebtn.active{background:var(--azul);color:#fff;border-color:var(--azul)}
+    @media (max-width:900px){.filters{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:520px){.filters{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Listado de Propiedades</h1>
+  </header>
+
+  <main>
+    <section class="filters">
+      <div>
+        <label>Región</label>
+        <select id="f-region">
+          <option value="all">Todas</option>
+        </select>
+      </div>
+      <div>
+        <label>Especial</label>
+        <select id="f-special">
+          <option value="all">Todas</option>
+          <option value="cenote">Cenote/Laguna</option>
+          <option value="playa">Frente a playa</option>
+          <option value="carretera">Frente a carretera</option>
+          <option value="esquina">Esquina</option>
+          <option value="centro">Centro</option>
+          <option value="premium">Premium</option>
+        </select>
+      </div>
+      <div>
+        <label>Precio mín. (USD)</label>
+        <input id="f-pricemin" type="number" placeholder="0">
+      </div>
+      <div>
+        <label>Precio máx. (USD)</label>
+        <input id="f-pricemax" type="number" placeholder="9999999">
+      </div>
+      <div>
+        <label>Área mín. (m²)</label>
+        <input id="f-areamin" type="number" placeholder="0">
+      </div>
+      <div>
+        <label>Área máx. (m²)</label>
+        <input id="f-areamax" type="number" placeholder="9999999">
+      </div>
+      <div style="grid-column:1/-1;display:flex;gap:8px">
+        <input id="f-text" type="text" placeholder="Buscar por nombre, región, manzana..." style="flex:1">
+        <button id="btn-apply" class="btn">Aplicar</button>
+        <button id="btn-clear" class="btn clear">Limpiar</button>
+      </div>
+    </section>
+
+    <div class="count" id="count">Mostrando 0 propiedades.</div>
+    <section class="grid" id="grid"></section>
+    <div class="pagination" id="pagination"></div>
+  </main>
+
+  <footer>
+    <small>© 2025 | Catálogo</small>
+  </footer>
+
+  <script>
+    // 1) PEGA AQUI TUS 38 PROPIEDADES (array de objetos)
+    // Campos soportados: id, name, location, priceUSD, areaM2, region, specialFeature, precioM2, manzana, featured (bool)
+    // Opcional: coordinates {lat,lng}, descriptionShort
+    const properties = [
+      // EJEMPLOS (reemplaza con tus 38). Puedes copiar/pegar los 23 que ya tienes y añadir los faltantes.
+      // { id: "terreno-XX", name: "Nombre", location: "Ciudad, Región", priceUSD: 0000, areaM2: 0000, region: "Region 15", specialFeature: "cenote", precioM2: 100, manzana: "mz 000", featured: true, descriptionShort: "..." },
+    ];
+
+    // 2) CONFIG
+    const perPage = 12;
+    let filtered = [...properties];
+    let currentPage = 1;
+
+    const grid = document.getElementById('grid');
+    const count = document.getElementById('count');
+    const pagination = document.getElementById('pagination');
+
+    const fRegion = document.getElementById('f-region');
+    const fSpecial = document.getElementById('f-special');
+    const fPriceMin = document.getElementById('f-pricemin');
+    const fPriceMax = document.getElementById('f-pricemax');
+    const fAreaMin = document.getElementById('f-areamin');
+    const fAreaMax = document.getElementById('f-areamax');
+    const fText = document.getElementById('f-text');
+
+    // Poblar filtros de región
+    function populateRegions(){
+      const regions = Array.from(new Set(properties.map(p => p.region).filter(Boolean))).sort();
+      regions.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r; opt.textContent = r;
+        fRegion.appendChild(opt);
+      });
+    }
+
+    function formatMoney(n){
+      if(n == null || isNaN(n)) return '';
+      return '$' + Number(n).toLocaleString('en-US') + ' USD';
+    }
+    function formatArea(n){
+      if(n == null || isNaN(n)) return '';
+      return Number(n).toLocaleString('es-MX') + ' m²';
+    }
+
+    function applyFilters(){
+      currentPage = 1;
+      const r = fRegion.value;
+      const s = fSpecial.value;
+      const pMin = parseFloat(fPriceMin.value);
+      const pMax = parseFloat(fPriceMax.value);
+      const aMin = parseFloat(fAreaMin.value);
+      const aMax = parseFloat(fAreaMax.value);
+      const txt = (fText.value||'').toLowerCase().trim();
+
+      filtered = properties.filter(p=>{
+        if(r!=='all' && p.region!==r) return false;
+        if(s!=='all'){
+          const ds = (p.descriptionShort||'').toLowerCase();
+          const feat = (p.specialFeature||'').toLowerCase();
+          const hit = (x)=>feat===x || ds.includes(x) || (p.region||'').toLowerCase().includes(x);
+          if(s==='cenote' && !hit('cenote') && !hit('laguna')) return false;
+          if(s==='playa' && !hit('playa')) return false;
+          if(s==='carretera' && !hit('carretera')) return false;
+          if(s==='esquina' && !hit('esquina')) return false;
+          if(s==='centro' && !hit('centro')) return false;
+          if(s==='premium' && !(feat==='premium' || p.featured)) return false;
+        }
+        if(!isNaN(pMin) && p.priceUSD < pMin) return false;
+        if(!isNaN(pMax) && p.priceUSD > pMax) return false;
+        if(!isNaN(aMin) && p.areaM2 < aMin) return false;
+        if(!isNaN(aMax) && p.areaM2 > aMax) return false;
+
+        if(txt){
+          const hay = [
+            p.name, p.location, p.region, p.manzana, p.descriptionShort
+          ].filter(Boolean).join(' ').toLowerCase();
+          if(!hay.includes(txt)) return false;
+        }
+        return true;
+      });
+
+      // Orden por featured y precio/área opcional
+      filtered.sort((a,b)=>{
+        const fa = a.featured?0:1, fb = b.featured?0:1;
+        if(fa!==fb) return fa-fb;
+        const pa = a.priority ?? 999, pb = b.priority ?? 999;
+        return pa - pb;
+      });
+      render();
+    }
+
+    function render(){
+      grid.innerHTML = '';
+      const total = filtered.length;
+      const pages = Math.max(1, Math.ceil(total/perPage));
+      currentPage = Math.min(currentPage, pages);
+      const start = (currentPage-1)*perPage;
+      const slice = filtered.slice(start, start+perPage);
+
+      count.textContent = total
+        ? `Mostrando ${start+1}-${start+slice.length} de ${total} propiedades (Página ${currentPage} de ${pages})`
+        : 'No se encontraron propiedades con los filtros aplicados.';
+
+      slice.forEach(p=>{
+        const icon =
+          p.specialFeature==='cenote' ? '💧' :
+          p.specialFeature==='playa' ? '🏖️' :
+          p.specialFeature==='carretera' ? '🛣️' :
+          p.specialFeature==='esquina' ? '📐' :
+          p.specialFeature==='centro' ? '🏛️' :
+          p.specialFeature==='premium' ? '⭐' : '📌';
+
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="media">
+            <div>${icon} Vista previa</div>
+            ${p.featured ? '<div class="badge">Destacado</div>' : ''}
+          </div>
+          <div class="body">
+            <h3 class="title">${icon} ${p.name || 'Propiedad'}</h3>
+            <div class="meta">📍 ${p.location || p.region || ''}</div>
+            <div class="meta">📐 ${formatArea(p.areaM2)} ${p.precioM2 ? ` • ${p.precioM2}/m²` : ''}</div>
+            <div class="price">${formatMoney(p.priceUSD)}</div>
+            <div class="meta">
+              ${p.manzana ? `<span class="chip">Manzana: ${p.manzana}</span>`:''}
+              ${p.specialFeature ? `<span class="chip">${p.specialFeature}</span>`:''}
+              ${p.region ? `<span class="chip">${p.region}</span>`:''}
+            </div>
+          </div>
+          <div class="footer">
+            <button class="btn" onclick="alert('ID: ${p.id || ''}')">Ver detalles</button>
+            <button class="btn secondary" onclick="navigator.clipboard.writeText('${(p.ubicacionUrl||'').replace(/'/g,'\\\'')}');alert('Ubicación copiada');">Copiar ubicación</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      // Paginación
+      pagination.innerHTML = '';
+      for(let i=1;i<=pages;i++){
+        const b = document.createElement('button');
+        b.className = 'pagebtn' + (i===currentPage?' active':'');
+        b.textContent = i;
+        b.onclick = ()=>{ currentPage=i; render(); window.scrollTo({top:0,behavior:'smooth'}); };
+        pagination.appendChild(b);
+      }
+    }
+
+    document.getElementById('btn-apply').addEventListener('click', applyFilters);
+    document.getElementById('btn-clear').addEventListener('click', ()=>{
+      fRegion.value='all'; fSpecial.value='all';
+      fPriceMin.value=''; fPriceMax.value='';
+      fAreaMin.value=''; fAreaMax.value='';
+      fText.value=''; applyFilters();
+    });
+    fText.addEventListener('keypress', (e)=>{ if(e.key==='Enter') applyFilters(); });
+
+    populateRegions();
+    applyFilters();
+  </script>
+</body>
+</html>

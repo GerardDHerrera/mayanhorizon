@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prueba Mapas + Base de Datos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-6">
+    <h2 class="text-2xl font-bold mb-4">Prueba: Mapas + Base de Datos</h2>
+    
+    <button onclick="testMapsIntegration()" class="bg-blue-500 text-white px-4 py-2 rounded mb-4">
+        Probar Integración
+    </button>
+    
+    <div id="test-results"></div>
+    <div id="mini-maps-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6"></div>
+
+    <script>
+        const GOOGLEMAPSAPIKEY = 'AIzaSyBn26o76tGltWl-S_KB9aaLzzwmmbIALjY';
+        let googleMapsApiLoaded = false;
+
+        function loadGoogleMapsScript() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLEMAPSAPIKEY}&callback=initGoogleMapsGlobally&libraries=maps,marker`;
+            script.async = true;
+            document.head.appendChild(script);
+        }
+
+        window.initGoogleMapsGlobally = function() {
+            googleMapsApiLoaded = true;
+            console.log("Google Maps API lista");
+        };
+
+        async function testMapsIntegration() {
+            const resultsDiv = document.getElementById('test-results');
+            const mapsContainer = document.getElementById('mini-maps-container');
+            
+            resultsDiv.innerHTML = '<p>Cargando datos...</p>';
+            mapsContainer.innerHTML = '';
+
+            try {
+                // Cargar datos de la base de datos
+                const response = await fetch('properties.php');
+                const properties = await response.json();
+                
+                resultsDiv.innerHTML = `
+                    <div class="bg-green-100 p-4 rounded">
+                        <h3 class="font-bold text-green-800">✅ Datos cargados exitosamente</h3>
+                        <p>Total de propiedades: ${properties.length}</p>
+                        <p>Con coordenadas válidas: ${properties.filter(p => p.coordinates.lat !== 0).length}</p>
+                    </div>
+                `;
+
+                // Crear mini-mapas para las primeras 6 propiedades
+                const propertiesWithCoords = properties.filter(p => 
+                    p.coordinates.lat !== 0 && p.coordinates.lng !== 0
+                ).slice(0, 6);
+
+                propertiesWithCoords.forEach((property, index) => {
+                    const mapDiv = document.createElement('div');
+                    mapDiv.innerHTML = `
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h4 class="font-semibold mb-2">${property.name}</h4>
+                            <div id="test-map-${index}" style="height: 200px; background: #f0f0f0;"></div>
+                            <p class="text-sm text-gray-600 mt-2">${property.location}</p>
+                        </div>
+                    `;
+                    mapsContainer.appendChild(mapDiv);
+
+                    // Inicializar mapa cuando Google Maps esté listo
+                    if (googleMapsApiLoaded) {
+                        initTestMap(`test-map-${index}`, property.coordinates, property.name);
+                    } else {
+                        setTimeout(() => {
+                            if (googleMapsApiLoaded) {
+                                initTestMap(`test-map-${index}`, property.coordinates, property.name);
+                            }
+                        }, 2000);
+                    }
+                });
+
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="bg-red-100 p-4 rounded">
+                        <h3 class="font-bold text-red-800">❌ Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function initTestMap(mapId, coordinates, title) {
+            if (!googleMapsApiLoaded) return;
+
+            try {
+                const { Map } = await google.maps.importLibrary("maps");
+                const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+                const mapElement = document.getElementById(mapId);
+                if (!mapElement) return;
+
+                const map = new Map(mapElement, {
+                    center: coordinates,
+                    zoom: 18,
+                    heading: 0,
+                    tilt: 45,
+                    mapTypeId: 'satellite',
+                    disableDefaultUI: true
+                });
+
+                new AdvancedMarkerElement({
+                    position: coordinates,
+                    map: map,
+                    title: title
+                });
+
+                // Animación de rotación
+                let currentHeading = 0;
+                setInterval(() => {
+                    currentHeading = (currentHeading + 1) % 360;
+                    map.setHeading(currentHeading);
+                }, 100);
+
+            } catch (error) {
+                console.error(`Error inicializando mapa ${mapId}:`, error);
+                mapElement.innerHTML = `<div class="flex items-center justify-center h-full text-red-500">Error de mapa</div>`;
+            }
+        }
+
+        // Cargar Google Maps al iniciar
+        loadGoogleMapsScript();
+    </script>
+</body>
+</html>

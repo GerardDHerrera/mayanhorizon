@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mayan Horizon - Propiedades de Prueba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* Definición de colores personalizados de Tailwind */
+        :root {
+            --color-profundo-azul: #002F5D;
+            --color-piedra-gris: #4B4B4B;
+            --color-turquesa-caribe: #00A8B5;
+            --color-oro-arena: #D4A017;
+            --color-verde-selva: #013220;
+            --color-background-light: #FDFBF8;
+            --color-mapa-stroke: #A67B5B;
+            --color-mapa-fill: rgba(166, 123, 91, 0.35);
+        }
+
+        @layer base {
+            body {
+                font-family: 'Montserrat', sans-serif;
+                background-color: var(--color-background-light);
+                color: var(--color-piedra-gris);
+            }
+        }
+
+        @layer components {
+            .text-profundoAzul { color: var(--color-profundo-azul); }
+            .text-piedraGris { color: var(--color-piedra-gris); }
+            .bg-turquesaCaribe { background-color: var(--color-turquesa-caribe); }
+            .hover\:bg-profundoAzul:hover { background-color: var(--color-profundo-azul); }
+            .text-oroArena { color: var(--color-oro-arena); }
+            .border-oroArena { border-color: var(--color-oro-arena); }
+        }
+
+        /* Estilos específicos para las tarjetas de propiedad y mini-mapas */
+        .property-card {
+            @apply bg-white rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 flex flex-col;
+        }
+        .property-card-media {
+            @apply w-full h-48 sm:h-56 md:h-64 bg-gray-100 flex items-center justify-center text-gray-400;
+            position: relative;
+        }
+        .full-size-map-embed {
+            @apply w-full h-full;
+        }
+        .mini-map-embed {
+            @apply w-full h-full;
+        }
+
+        /* Solución para el cursor: Aplica el estilo a los elementos internos de Google Maps */
+        .mini-map-embed > div, .mini-map-embed > div > canvas, .mini-map-embed > div > div {
+            cursor: pointer !important;
+        }
+
+        /* Número del mapa - más visible */
+        .map-number {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0, 47, 93, 0.95);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 2px solid #D4A017;
+        }
+
+        /* Indicador de carga del mapa */
+        .map-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255,255,255,0.9);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 999;
+        }
+
+        /* Estilos para la paginación */
+        .pagination-container {
+            @apply flex justify-center items-center space-x-4 mt-8 p-6 bg-white rounded-lg shadow-md;
+        }
+
+        .pagination-button {
+            @apply px-4 py-2 rounded-md font-medium transition-all duration-300;
+        }
+
+        .pagination-button.active {
+            @apply bg-profundoAzul text-white;
+        }
+
+        .pagination-button:not(.active) {
+            @apply bg-gray-200 text-piedraGris hover:bg-turquesaCaribe hover:text-white;
+        }
+
+        .pagination-button:disabled {
+            @apply opacity-50 cursor-not-allowed hover:bg-gray-200 hover:text-piedraGris;
+        }
+
+        .property-card-info {
+            @apply p-4 flex-grow flex flex-col justify-between;
+        }
+        .property-card-title {
+            @apply text-xl font-semibold text-profundoAzul mb-2;
+        }
+        .property-card-location, .property-card-area {
+            @apply text-piedraGris text-sm flex items-center mb-1;
+        }
+        .property-card-location i, .property-card-area i {
+            @apply mr-2 text-oroArena;
+        }
+        .property-card-price {
+            @apply text-2xl font-bold text-oroArena mt-3 mb-4;
+        }
+        .property-card-button {
+            @apply inline-block bg-turquesaCaribe text-white font-bold py-2 px-4 rounded-full text-center hover:bg-profundoAzul transition-colors duration-300 mt-auto;
+        }
+        /* Estilos para el campo de entrada de búsqueda */
+        .filter-input {
+            @apply block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-oroArena focus:border-oroArena;
+        }
+        /* Estilos para los botones de acción */
+        .filter-button {
+            @apply w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-turquesaCaribe hover:bg-profundoAzul focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-turquesaCaribe;
+        }
+        .clear-button {
+            @apply w-full py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-turquesaCaribe;
+        }
+        
+        /* Estilos para el Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            position: relative;
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 800px;
+            height: 90%;
+            max-height: 800px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-map-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .close-button {
+            color: #aaaaaa;
+            font-size: 40px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-button:hover,
+        .close-button:focus {
+            color: #D4A017;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body class="bg-background-light text-piedraGris leading-relaxed">
+
+    <header class="bg-profundoAzul text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-oroArena">Mayan Horizon</h1>
+            <nav class="hidden md:block">
+                <a href="#" class="mx-3 hover:text-turquesaCaribe transition-colors">Nosotros</a>
+                <a href="#" class="mx-3 hover:text-turquesaCaribe transition-colors">Mapa</a>
+                <a href="#" class="mx-3 hover:text-turquesaCaribe transition-colors">Simulador</a>
+                <a href="#" class="mx-3 hover:text-turquesaCaribe transition-colors">Propiedades</a>
+                <a href="#" class="mx-3 hover:text-turquesaCaribe transition-colors">Contacto</a>
+            </nav>
+            <button class="md:hidden text-white text-2xl" id="menuToggle">☰</button>
+        </div>
+        <div id="ClaseMobileNav" class="fixed top-0 left-0 w-full h-full bg-profundoAzul text-white z-50 transform -translate-x-full transition-transform duration-300 ease-in-out">
+            <div class="flex justify-end p-4">
+                <button id="closeMobileMenu" class="text-white text-3xl">✖</button>
+            </div>
+            <nav class="flex flex-col items-center justify-center h-full space-y-6 text-xl">
+                <a href="#" class="hover:text-turquesaCaribe transition-colors">Nosotros</a>
+                <a href="#" class="hover:text-turquesaCaribe transition-colors">Mapa</a>
+                <a href="#" class="hover:text-turquesaCaribe transition-colors">Simulador</a>
+                <a href="#" class="hover:text-turquesaCaribe transition-colors">Propiedades</a>
+                <a href="#" class="hover:text-turquesaCaribe transition-colors">Contacto</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-6 md:p-8 mt-8">
+        <h2 class="text-4xl font-extrabold text-center text-profundoAzul mb-10">Explora Nuestras Propiedades</h2>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <aside class="w-full md:w-1/4 bg-white p-6 rounded-lg shadow-md sticky top-4">
+                <h3 class="text-2xl font-bold text-profundoAzul mb-6">Filtra tu Búsqueda</h3>
+
+                <div class="mb-5">
+                    <label for="filter-region" class="block text-sm font-medium text-piedraGris mb-2">Región</label>
+                    <select id="filter-region" class="filter-input">
+                        <option value="all">Todas las Regiones</option>
+                        <option value="Region 15">Region 15</option>
+                        <option value="Region 8">Region 8</option>
+                        <option value="Region 11">Region 11</option>
+                        <option value="Region 12">Region 12</option>
+                        <option value="Centro">Centro</option>
+                        <option value="Carretera">Carretera</option>
+                        <option value="Laguna Union">Laguna Union</option>
+                        <option value="Francisco Uh May">Francisco Uh May</option>
+                    </select>
+                </div>
+
+                <div class="mb-5">
+                    <label for="filter-special" class="block text-sm font-medium text-piedraGris mb-2">Características Especiales</label>
+                    <select id="filter-special" class="filter-input">
+                        <option value="all">Todas</option>
+                        <option value="cenote">💧 Con Cenote/Laguna</option>
+                        <option value="playa">🏖️ Frente a Playa</option>
+                        <option value="carretera">🛣️ Frente a Carretera</option>
+                        <option value="esquina">📐 Lote Esquina</option>
+                        <option value="centro">🏛️ Zona Centro</option>
+                        <option value="premium">⭐ Premium/Exclusivo</option>
+                    </select>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-medium text-piedraGris mb-2">Rango de Precio (USD)</label>
+                    <div class="flex gap-3">
+                        <input type="number" id="filter-price-min" placeholder="Mín." class="filter-input w-1/2">
+                        <input type="number" id="filter-price-max" placeholder="Máx." class="filter-input w-1/2">
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">
+                        <span class="block">Rangos populares:</span>
+                        <button onclick="setFilters('price', 0, 200000)" class="text-turquesaCaribe hover:underline mr-2">≤$200K</button>
+                        <button onclick="setFilters('price', 200000, 1000000)" class="text-turquesaCaribe hover:underline mr-2">$200K-$1M</button>
+                        <button onclick="setFilters('price', 1000000, 999999999)" class="text-turquesaCaribe hover:underline">+$1M</button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-piedraGris mb-2">Rango de Área (M²)</label>
+                    <div class="flex gap-3">
+                        <input type="number" id="filter-area-min" placeholder="Mín." class="filter-input w-1/2">
+                        <input type="number" id="filter-area-max" placeholder="Máx." class="filter-input w-1/2">
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">
+                        <span class="block">Tamaños típicos:</span>
+                        <button onclick="setFilters('area', 0, 2000)" class="text-turquesaCaribe hover:underline mr-2">≤2,000m²</button>
+                        <button onclick="setFilters('area', 2000, 10000)" class="text-turquesaCaribe hover:underline mr-2">2K-10Km²</button>
+                        <button onclick="setFilters('area', 10000, 999999)" class="text-turquesaCaribe hover:underline">+10Km²</button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label for="filter-text-search" class="block text-sm font-medium text-piedraGris mb-2">Búsqueda rápida</label>
+                    <input type="text" id="filter-text-search" placeholder="Buscar por lote, manzana, etc." class="filter-input">
+                </div>
+
+                <div class="flex flex-col space-y-3">
+                    <button id="apply-filters-btn" class="filter-button">Aplicar Filtros</button>
+                    <button id="clear-filters-btn" class="clear-button">Limpiar Filtros</button>
+                </div>
+                
+                <p id="property-count" class="text-sm text-gray-600 mt-6 text-center">Mostrando 0 propiedades.</p>
+                
+                <div class="mt-4 p-3 bg-gray-50 rounded-lg text-center">
+                    <p class="text-xs text-gray-600">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Se muestran máximo 9 terrenos por página para mejor rendimiento
+                    </p>
+                </div>
+            </aside>
+
+            <section class="w-full md:w-3/4">
+                <div id="propiedades-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+
+                <div id="pagination-container" class="pagination-container">
+                    <button id="prev-page" class="pagination-button" onclick="changePage(-1)">
+                        <i class="fas fa-chevron-left mr-2"></i>Anterior
+                    </button>
+                    
+                    <div id="page-numbers" class="flex space-x-2">
+                        </div>
+                    
+                    <button id="next-page" class="pagination-button" onclick="changePage(1)">
+                        Siguiente<i class="fas fa-chevron-right ml-2"></i>
+                    </button>
+                </div>
+
+                <div id="no-results-message" class="hidden text-center text-gray-500 py-8 col-span-full">
+                    No se encontraron propiedades que coincidan con los filtros.
+                </div>
+
+                <div id="MapaErrorMensaje" class="hidden text-center text-red-600 py-8 col-span-full">
+                    ¡Oops! No pudimos cargar el mapa. Por favor, verifica tu clave API de Google Maps o inténtalo de nuevo.
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-profundoAzul text-white p-6 mt-12">
+        <div class="container mx-auto text-center">
+            <p>© 2025 Mayan Horizon. Todos los derechos reservados.</p>
+            <p class="mt-2 text-sm">Invierte donde la cultura se encuentra con el futuro.</p>
+        </div>
+    </footer>
+
+    <div id="mapModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">×</span>
+            <div id="modal-map-container" class="modal-map-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Google Maps API Key ---
+        const GOOGLEMAPSAPIKEY = 'AIzaSyBn26o76tGltWl-S_KB9aaLzzwmmbIALjY';
+
+        let allPropertiesData = []; 
+        let filteredPropertiesData = [];
+        let currentPage = 1;
+        const propertiesPerPage = 9; // MÁXIMO 9 POR PÁGINA
+        let currentMapInstances = {}; 
+        let googleMapsApiLoaded = false;
+        let googleMapsScriptLoaded = false; 
+        let pendingMapCallbacks = [];
+        let mapAnimationInterval = null;
+
+        // TERRENOS PREMIUM ORDENADOS (Frente Playa en posición 2)
+        const allAvailableProperties = [
+            // TOP 9 - PÁGINA 1 (LOS MEJORES)
+            {"id":"terreno-37","name":"Rancho con cenote","location":"Francisco Uh May","priceUSD":275000,"areaM2":80000,"type":"Terreno","descriptionShort":"irregular - ¡CENOTE NATURAL!","coordinates":{"lat":20.343839,"lng":-87.637712},"region":"Francisco Uh May","entidad":"Francisco Uh May","manzana":"","precioM2":3.4,"ubicacionUrl":"https://maps.app.goo.gl/HY8o3ZQD44egYD1T8","specialFeature":"cenote","priority":1,"featured":true, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-31","name":"Frente Playa Bocapaila","location":"Tulum/Carretera, Carretera Bocapaila","priceUSD":660000,"areaM2":11000,"type":"Terreno","descriptionShort":"¡FRENTE PLAYA! 50m x 220m","coordinates":{"lat":19.976389,"lng":-87.467872},"region":"Carretera","entidad":"Tulum/Carretera","manzana":"","precioM2":60,"ubicacionUrl":"https://maps.app.goo.gl/8he6ty2D2SDT2JN46","specialFeature":"playa","priority":2,"featured":true, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-29","name":"Parcela 77 Laguna","location":"Tulum, Laguna Union","priceUSD":3500000,"areaM2":300000,"type":"Terreno","descriptionShort":"30 HECTÁREAS - ¡LAGUNA NATURAL!","coordinates":{"lat":20.217736,"lng":-87.525844},"region":"Laguna Union","entidad":"Tulum","manzana":"","precioM2":11.66,"ubicacionUrl":"https://maps.app.goo.gl/CKTWEX7HJy4nYNtS6","specialFeature":"cenote","priority":3,"featured":true, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-28","name":"Lote Centro 02","location":"Tulum, Centro, mz 129","priceUSD":871793,"areaM2":1584.98,"type":"Terreno","descriptionShort":"esquina 31.7m x 50m","coordinates":{"lat":20.204208,"lng":-87.450665},"region":"Centro","entidad":"Tulum","manzana":"mz 129","precioM2":550,"ubicacionUrl":"https://maps.app.goo.gl/VGpBpbidL25vEJ479","specialFeature":"centro","priority":4,"featured":true, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-22","name":"Lote 01 Carretera","location":"Tulum, Region 11, mz 880","priceUSD":1562850,"areaM2":10419,"type":"Terreno","descriptionShort":"carretera 25.60m x 407m","coordinates":{"lat":20.1993473,"lng":-87.500429},"region":"Region 11","entidad":"Tulum","manzana":"mz 880","precioM2":150,"ubicacionUrl":"https://maps.app.goo.gl/41sFE17ChCeHjTrH6","specialFeature":"carretera","priority":5,"featured":true, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-2","name":"Lote 23 Esquina","location":"Tulum, Region 15, mz 189","priceUSD":157000,"areaM2":628,"type":"Terreno","descriptionShort":"esquina 22.14m x 28.47m","coordinates":{"lat":20.1873625,"lng":-87.4665912},"region":"Region 15","entidad":"Tulum","manzana":"mz 189","precioM2":250,"ubicacionUrl":"https://maps.app.goo.gl/j8BMwBpYnC2qTbVn6","specialFeature":"esquina","priority":6,"featured":true, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-13","name":"Lote 04 Premium","location":"Tulum, Region 8, mz 559","priceUSD":1050000,"areaM2":2500,"type":"Terreno","descriptionShort":"esquina 50m x 50m - ALTA PLUSVALÍA","coordinates":{"lat":20.1803003,"lng":-87.4583059},"region":"Region 8","entidad":"Tulum","manzana":"mz 559","precioM2":420,"ubicacionUrl":"https://maps.app.goo.gl/zCmttVMT2yqDQ5qW6","specialFeature":"premium","priority":7,"featured":true, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-20","name":"Lote 003-2","location":"Tulum, Region 12, mz 932","priceUSD":151000,"areaM2":1717,"type":"Terreno","descriptionShort":"26.19m x 65.56m","coordinates":{"lat":20.1892868,"lng":-87.4976998},"region":"Region 12","entidad":"Tulum","manzana":"mz 932","precioM2":88,"ubicacionUrl":"https://maps.app.goo.gl/Ciy3hZyeK9omdkyb7","specialFeature":"","priority":8,"featured":true, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-9","name":"Manzana Única 67","location":"Tulum, Region 15, mz 67","priceUSD":2500000,"areaM2":10000,"type":"Terreno","descriptionShort":"100m x 100m - MANZANA COMPLETA","coordinates":{"lat":20.1958697,"lng":-87.4669228},"region":"Region 15","entidad":"Tulum","manzana":"mz 67","precioM2":250,"ubicacionUrl":"https://maps.app.goo.gl/ntRGyBWo5yAR2D1m8","specialFeature":"premium","priority":9,"featured":true, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            
+            // PÁGINA 2 - OTROS EXCELENTES
+            {"id":"terreno-8","name":"Lotes varios mz 166","location":"Tulum, Region 15, mz 166","priceUSD":173187,"areaM2":736.97,"type":"Terreno","descriptionShort":"15m x 49.50m","coordinates":{"lat":20.1866511,"lng":-87.4765637},"region":"Region 15","entidad":"Tulum","manzana":"mz 166","precioM2":235,"ubicacionUrl":"https://maps.app.goo.gl/41qqUGaeQYsqeAzb9","specialFeature":"","priority":10, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-16","name":"Lote 6","location":"Tulum, Region 12, mz 941","priceUSD":413600,"areaM2":10340,"type":"Terreno","descriptionShort":"78.57m x 131.50m","coordinates":{"lat":20.1863021,"lng":-87.4892234},"region":"Region 12","entidad":"Tulum","manzana":"mz 941","precioM2":40,"ubicacionUrl":"https://maps.app.goo.gl/m84ghb1eZSS99LEY9","specialFeature":"","priority":11, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-24","name":"Lotes 13, 14","location":"Tulum, Region 11, mz 846","priceUSD":450000,"areaM2":5000,"type":"Terreno","descriptionShort":"50m x 100m","coordinates":{"lat":20.215416,"lng":-87.492842},"region":"Region 11","entidad":"Tulum","manzana":"mz 846","precioM2":90,"ubicacionUrl":"https://maps.app.goo.gl/5dXH9ovKCgtYoYj68","specialFeature":"","priority":12, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-18","name":"Lote 05 Esquina","location":"Tulum, Region 12, mz 932","priceUSD":827200,"areaM2":10340,"type":"Terreno","descriptionShort":"esquina 78.57m x 131.50m","coordinates":{"lat":20.1899892,"lng":-87.4959634},"region":"Region 12","entidad":"Tulum","manzana":"mz 932","precioM2":80,"ubicacionUrl":"https://maps.app.goo.gl/VyPtckczCPXLLqgbA","specialFeature":"esquina","priority":13, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-21","name":"Lote 06 Carretera","location":"Tulum, Region 11, mz 880","priceUSD":517000,"areaM2":2350,"type":"Terreno","descriptionShort":"carretera 21m x 112,5","coordinates":{"lat":20.1994231,"lng":-87.5009061},"region":"Region 11","entidad":"Tulum","manzana":"mz 880","precioM2":220,"ubicacionUrl":"https://maps.app.goo.gl/VF1QWcdUft4DQSAm6","specialFeature":"carretera","priority":14, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-17","name":"Lote 2","location":"Tulum, Region 12, mz 910","priceUSD":672100,"areaM2":10340,"type":"Terreno","descriptionShort":"78.57m x 131.50m","coordinates":{"lat":20.1959977,"lng":-87.4941975},"region":"Region 12","entidad":"Tulum","manzana":"mz 910","precioM2":65,"ubicacionUrl":"https://maps.app.goo.gl/DnUGXTXDrV5KdoRC9","specialFeature":"","priority":15, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-25","name":"Lote 27","location":"Tulum, Region 11, mz 787","priceUSD":400000,"areaM2":10000,"type":"Terreno","descriptionShort":"100m x 100m","coordinates":{"lat":20.243286,"lng":-87.492219},"region":"Region 11","entidad":"Tulum","manzana":"mz 787","precioM2":40,"ubicacionUrl":"https://maps.app.goo.gl/2zGoG69FfhcUBtzY8","specialFeature":"","priority":16, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-30","name":"Parcela 176 Carretera","location":"Tulum/Carretera, Carretera Kaan Lum","priceUSD":1840000,"areaM2":46000,"type":"Terreno","descriptionShort":"Carretera 116m x 400m","coordinates":{"lat":19.976389,"lng":-87.467872},"region":"Carretera","entidad":"Tulum/Carretera","manzana":"","precioM2":40,"ubicacionUrl":"https://maps.app.goo.gl/8he6ty2D2SDT2JN46","specialFeature":"carretera","priority":17, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-11","name":"Lote 01","location":"Tulum, Region 8, Mz 701","priceUSD":261000,"areaM2":2175,"type":"Terreno","descriptionShort":"esquina irregular","coordinates":{"lat":20.1712057,"lng":-87.4587444},"region":"Region 8","entidad":"Tulum","manzana":"Mz 701","precioM2":120,"ubicacionUrl":"https://maps.app.goo.gl/5eFW9Q1KGQVY46UMA","specialFeature":"esquina","priority":18, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            
+            // PÁGINA 3 - MÁS OPCIONES
+            {"id":"terreno-1","name":"Lotes 12, 05, 20","location":"Tulum, Region 15, mz 189","priceUSD":75250,"areaM2":301,"type":"Terreno","descriptionShort":"14.28m x 21.23","coordinates":{"lat":20.1875765,"lng":-87.4662261},"region":"Region 15","entidad":"Tulum","manzana":"mz 189","precioM2":250,"ubicacionUrl":"https://maps.app.goo.gl/fv3DSVdKMFWqQsg2A","specialFeature":"","priority":19, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-3","name":"Lotes 08, 11","location":"Tulum, Region 15, mz 150","priceUSD":83000,"areaM2":325,"type":"Terreno","descriptionShort":"16.48m x 19.74m","coordinates":{"lat":20.1908655,"lng":-87.4651629},"region":"Region 15","entidad":"Tulum","manzana":"mz 150","precioM2":250,"ubicacionUrl":"https://maps.app.goo.gl/gyvonV7u7VCrLa216","specialFeature":"","priority":20, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-14","name":"Lote 02","location":"Tulum, Region 8, mz 615","priceUSD":160500,"areaM2":1070,"type":"Terreno","descriptionShort":"25m x 43.12m","coordinates":{"lat":20.17453,"lng":-87.4681717},"region":"Region 8","entidad":"Tulum","manzana":"mz 615","precioM2":150,"ubicacionUrl":"https://maps.app.goo.gl/11j618Z5jQJfoyYh6","specialFeature":"","priority":21, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-15","name":"Lote 02","location":"Tulum, Region 8, mz 588","priceUSD":162500,"areaM2":1250,"type":"Terreno","descriptionShort":"25m x 50m","coordinates":{"lat":20.1737395,"lng":-87.4725038},"region":"Region 8","entidad":"Tulum","manzana":"mz 588","precioM2":130,"ubicacionUrl":"https://maps.app.goo.gl/Mh6ee18xFVBNpvwd8","specialFeature":"","priority":22, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']},
+            {"id":"terreno-33","name":"Varios Lotes Muyil","location":"Ciudad Muyil, Muyil","priceUSD":29000,"areaM2":1000,"type":"Terreno","descriptionShort":"20m x 50m","coordinates":{"lat":20.104158,"lng":-87.626358},"region":"Muyil","entidad":"Ciudad Muyil","manzana":"","precioM2":29,"ubicacionUrl":"https://maps.app.goo.gl/8o4AoaQpSdCSkJes6","specialFeature":"","priority":23, "images": ['Imagenes/placeholder1.jpg', 'Imagenes/placeholder2.jpg']}
+        ];
+
+        function loadGoogleMapsScript() {
+            if (googleMapsScriptLoaded) return; 
+
+            const scriptGoogleMaps = document.createElement('script');
+            scriptGoogleMaps.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLEMAPSAPIKEY}&callback=initGoogleMapsGlobally&libraries=maps,marker,drawing,streetView`;
+            scriptGoogleMaps.async = true;
+            scriptGoogleMaps.defer = true;
+            scriptGoogleMaps.onerror = () => {
+                console.error("Error al cargar el script de Google Maps. Verifica tu clave API y la conexión a internet.");
+                const mapErrorMsg = document.getElementById('MapaErrorMensaje');
+                if (mapErrorMsg) mapErrorMsg.classList.remove('hidden');
+            };
+            document.head.appendChild(scriptGoogleMaps);
+            googleMapsScriptLoaded = true; 
+        }
+
+        window.initGoogleMapsGlobally = function() {
+            console.log("Google Maps API cargada globalmente.");
+            googleMapsApiLoaded = true;
+            processPendingMapCallbacks();
+        };
+
+        async function processPendingMapCallbacks() {
+            while (pendingMapCallbacks.length > 0) {
+                const callbackFn = pendingMapCallbacks.shift();
+                await new Promise(resolve => setTimeout(resolve, 400)); // Tiempo entre mapas
+                callbackFn();
+            }
+        }
+
+        // Función para establecer filtros rápidos
+        function setFilters(type, min, max) {
+            if (type === 'price') {
+                document.getElementById('filter-price-min').value = min > 0 ? min : '';
+                document.getElementById('filter-price-max').value = max < 999999999 ? max : '';
+            } else if (type === 'area') {
+                document.getElementById('filter-area-min').value = min > 0 ? min : '';
+                document.getElementById('filter-area-max').value = max < 999999 ? max : '';
+            }
+            applyFilters();
+        }
+
+        // Función de paginación para botones Anterior/Siguiente
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredPropertiesData.length / propertiesPerPage);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                renderCurrentPage();
+                updatePaginationControls();
+                
+                // Scroll suave al inicio
+                document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // FUNCIÓN CLAVE PARA LOS BOTONES NUMÉRICOS
+        function goToPage(pageNumber) {
+            const totalPages = Math.ceil(filteredPropertiesData.length / propertiesPerPage);
+            if (pageNumber >= 1 && pageNumber <= totalPages) {
+                currentPage = pageNumber;
+                renderCurrentPage();
+                updatePaginationControls();
+                
+                // Scroll suave al inicio
+                document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function updatePaginationControls() {
+            const totalPages = Math.ceil(filteredPropertiesData.length / propertiesPerPage);
+            const prevBtn = document.getElementById('prev-page');
+            const nextBtn = document.getElementById('next-page');
+            const pageNumbers = document.getElementById('page-numbers');
+            
+            // Actualizar botones anterior/siguiente
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages;
+            
+            // Actualizar números de página
+            pageNumbers.innerHTML = '';
+            
+            if (totalPages <= 5) {
+                // Mostrar todas las páginas si son 5 o menos
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.textContent = i;
+                    pageBtn.className = `pagination-button ${i === currentPage ? 'active' : ''}`;
+                    pageBtn.onclick = () => goToPage(i);
+                    pageNumbers.appendChild(pageBtn);
+                }
+            } else {
+                // Mostrar paginación inteligente para más de 5 páginas
+                const startPage = Math.max(1, currentPage - 2);
+                const endPage = Math.min(totalPages, startPage + 4);
+                
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.textContent = i;
+                    pageBtn.className = `pagination-button ${i === currentPage ? 'active' : ''}`;
+                    pageBtn.onclick = () => goToPage(i);
+                    pageNumbers.appendChild(pageBtn);
+                }
+            }
+            
+            // Actualizar visibilidad del contenedor
+            const paginationContainer = document.getElementById('pagination-container');
+            paginationContainer.style.display = totalPages > 1 ? 'flex' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Lógica para el menú móvil ---
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileNav = document.getElementById('ClaseMobileNav');
+            const closeMobileMenu = document.getElementById('closeMobileMenu');
+
+            if (menuToggle && mobileNav && closeMobileMenu) {
+                menuToggle.addEventListener('click', () => {
+                    mobileNav.classList.add('is-open');
+                    document.body.style.overflow = 'hidden';
+                });
+                closeMobileMenu.addEventListener('click', () => {
+                    mobileNav.classList.remove('is-open');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            // --- Elementos del DOM ---
+            const propiedadesGrid = document.getElementById('propiedades-grid');
+            const filterRegion = document.getElementById('filter-region');
+            const filterSpecial = document.getElementById('filter-special');
+            const filterPriceMin = document.getElementById('filter-price-min');
+            const filterPriceMax = document.getElementById('filter-price-max');
+            const filterAreaMin = document.getElementById('filter-area-min');
+            const filterAreaMax = document.getElementById('filter-area-max');
+            const filterTextSearch = document.getElementById('filter-text-search');
+            const applyFiltersBtn = document.getElementById('apply-filters-btn');
+            const clearFiltersBtn = document.getElementById('clear-filters-btn');
+            const propertyCountDisplay = document.getElementById('property-count');
+            const noResultsMessage = document.getElementById('no-results-message');
+
+            // Función para renderizar una tarjeta de propiedad
+            async function renderPropertyCard(property, index) {
+                const card = document.createElement('div');
+                card.className = 'property-card';
+                
+                let mediaHtml = '';
+                let mapDivId = '';
+
+                if (property.coordinates) {
+                    mapDivId = `mini-map-${property.id}`;
+                    mediaHtml = `
+                        <div id="${mapDivId}" class="mini-map-embed" style="height: 256px;" title="Ver ubicación">
+                            <div class="map-number">#${((currentPage - 1) * propertiesPerPage) + index + 1}</div>
+                            <div class="map-loading">⏳ Cargando mapa...</div>
+                        </div>`;
+                    
+                    const initThisMiniMap = async () => {
+                        if (!currentMapInstances[mapDivId] && document.getElementById(mapDivId)) {
+                            await initMiniMap(mapDivId, property.coordinates, property.name);
+                            currentMapInstances[mapDivId] = true;
+                        }
+                    };
+
+                    if (googleMapsApiLoaded) {
+                        setTimeout(initThisMiniMap, index * 600); // Escalonar carga
+                    } else {
+                        pendingMapCallbacks.push(initThisMiniMap);
+                    }
+                } else {
+                    mediaHtml = `<div class="w-full h-full bg-gray-200 flex items-center justify-center text-center text-gray-500 p-4">
+                                    <div class="map-number">#${((currentPage - 1) * propertiesPerPage) + index + 1}</div>
+                                    <i class="fas fa-image mr-2"></i> Imagen no disponible
+                                 </div>`;
+                }
+
+                // Icono especial según característica
+                let specialIcon = '';
+                if (property.specialFeature === 'cenote') specialIcon = '💧';
+                else if (property.specialFeature === 'playa') specialIcon = '🏖️';
+                else if (property.specialFeature === 'carretera') specialIcon = '🛣️';
+                else if (property.specialFeature === 'esquina') specialIcon = '📐';
+                else if (property.specialFeature === 'centro') specialIcon = '🏛️';
+                else if (property.specialFeature === 'premium') specialIcon = '⭐';
+
+                // Badge de "Destacado" para los primeros 9
+                let featuredBadge = '';
+                if (property.featured) {
+                    featuredBadge = '<div class="absolute top-2 right-2 bg-oro-arena text-white px-2 py-1 rounded-full text-xs font-bold z-50">⭐ DESTACADO</div>';
+                }
+
+                card.innerHTML = `
+                    <div class="property-card-media"> 
+                        ${mediaHtml}
+                        ${featuredBadge}
+                    </div>
+                    <div class="property-card-info">
+                        <h3 class="property-card-title">${specialIcon} ${property.name}</h3>
+                        <p class="property-card-location"><i class="fas fa-map-marker-alt"></i> ${property.location}</p>
+                        <p class="property-card-area"><i class="fas fa-ruler-combined"></i> ${property.areaM2.toLocaleString()} m²</p>
+                        ${property.precioM2 ? `<p class="text-sm text-gray-600"><i class="fas fa-calculator"></i> $${property.precioM2}/m²</p>` : ''}
+                        <p class="property-card-price">$${property.priceUSD.toLocaleString()} USD</p>
+                        <button onclick="showPropertyDetails('${property.id}')" class="property-card-button">Ver Detalles</button>
+                    </div>
+                `;
+                propiedadesGrid.appendChild(card);
+            }
+
+            async function renderCurrentPage() {
+                // Detener todas las animaciones de los mapas anteriores
+                for (const mapId in currentMapInstances) {
+                    if (currentMapInstances[mapId].animationInterval) {
+                        clearInterval(currentMapInstances[mapId].animationInterval);
+                    }
+                }
+
+                propiedadesGrid.innerHTML = ''; 
+                currentMapInstances = {}; 
+                pendingMapCallbacks = []; 
+                noResultsMessage.classList.add('hidden');
+
+                const startIndex = (currentPage - 1) * propertiesPerPage;
+                const endIndex = startIndex + propertiesPerPage;
+                const pageProperties = filteredPropertiesData.slice(startIndex, endIndex);
+
+                if (pageProperties.length === 0) {
+                    noResultsMessage.classList.remove('hidden');
+                } else {
+                    for (let i = 0; i < pageProperties.length; i++) {
+                        await renderPropertyCard(pageProperties[i], i); 
+                    }
+                }
+
+                const totalResults = filteredPropertiesData.length;
+                const showingStart = startIndex + 1;
+                const showingEnd = Math.min(endIndex, totalResults);
+                const totalPages = Math.ceil(totalResults / propertiesPerPage);
+                
+                propertyCountDisplay.textContent = `Mostrando ${showingStart}-${showingEnd} de ${totalResults} propiedades (Página ${currentPage} de ${totalPages})`;
+
+                if (googleMapsApiLoaded) {
+                    processPendingMapCallbacks();
+                }
+            }
+
+            async function initMiniMap(mapDivId, coordinates, propertyName = '') {
+                if (!googleMapsApiLoaded || typeof google === 'undefined' || typeof google.maps === 'undefined') {
+                    console.error('initMiniMap llamado antes de que Google Maps API esté lista.');
+                    return;
+                }
+
+                try {
+                    // Remover indicador de carga
+                    const mapElement = document.getElementById(mapDivId);
+                    if (!mapElement) return;
+                    
+                    const loadingIndicator = mapElement.querySelector('.map-loading');
+                    if (loadingIndicator) loadingIndicator.remove();
+
+                    const { Map } = await google.maps.importLibrary("maps");
+                    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+                    const miniMap = new Map(mapElement, {
+                        center: coordinates,
+                        zoom: 18,
+                        heading: 0,
+                        tilt: 45,
+                        mapId: "1a24d0ef8ab865bd50059e0e",
+                        mapTypeId: 'satellite',
+                        disableDefaultUI: true,
+                        gestureHandling: 'none' 
+                    });
+
+                    new AdvancedMarkerElement({
+                        position: coordinates,
+                        map: miniMap,
+                        title: propertyName,
+                    });
+                    
+                    let currentHeading = 0;
+                    const animationInterval = setInterval(() => {
+                        currentHeading = (miniMap.getHeading() + 0.3) % 360; 
+                        miniMap.setHeading(currentHeading);
+                    }, 100);
+
+                    // Guardar la instancia del mapa y el intervalo de animación
+                    currentMapInstances[mapDivId] = { map: miniMap, animationInterval: animationInterval };
+
+                    console.log(`Mapa inicializado: ${mapDivId}`);
+
+                } catch (error) {
+                    console.error(`Error al inicializar mini-mapa para ${mapDivId}:`, error);
+                    const mapElement = document.getElementById(mapDivId);
+                    if (mapElement) {
+                        mapElement.innerHTML = `<div class="w-full h-full bg-red-100 flex items-center justify-center text-red-600 p-4">
+                            <div class="map-number">#${mapDivId.split('-')[2]}</div>
+                            ❌ Error al cargar mapa
+                        </div>`;
+                    }
+                }
+            }
+
+            async function initFullMap(mapDivId, coordinates, propertyName = '') {
+                if (!googleMapsApiLoaded || typeof google === 'undefined' || typeof google.maps === 'undefined') {
+                    console.error('initFullMap llamado antes de que Google Maps API esté lista.');
+                    return;
+                }
+                
+                try {
+                    const { Map } = await google.maps.importLibrary("maps");
+                    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+
+                    const fullMap = new Map(document.getElementById(mapDivId), {
+                        center: coordinates,
+                        zoom: 18,
+                        heading: 0,
+                        tilt: 45,
+                        mapId: "1a24d0ef8ab865bd50059e0e",
+                        mapTypeId: 'satellite',
+                        disableDefaultUI: false,
+                        gestureHandling: 'cooperative' 
+                    });
+
+                    new AdvancedMarkerElement({
+                        position: coordinates,
+                        map: fullMap,
+                        title: propertyName,
+                    });
+
+                    let currentHeading = 0;
+                    mapAnimationInterval = setInterval(() => {
+                        currentHeading = (fullMap.getHeading() + 0.5) % 360; 
+                        fullMap.setHeading(currentHeading);
+                    }, 50);
+
+                    console.log(`Mapa de modal inicializado para ${propertyName}`);
+                } catch (error) {
+                    console.error(`Error al inicializar mapa en modal:`, error);
+                }
+            }
+
+            async function fetchProperties() {
+                try {
+                    // Usar los datos ordenados
+                    allPropertiesData = [...allAvailableProperties];
+                    console.log(`${allPropertiesData.length} propiedades cargadas (${allPropertiesData.filter(p => p.featured).length} destacadas)`);
+                    
+                    applyFilters(); 
+                } catch (error) {
+                    console.error("Error al cargar las propiedades:", error);
+                }
+            }
+
+            window.applyFilters = async function() {
+                currentPage = 1; // Reset a página 1 cuando se filtra
+                filteredPropertiesData = [...allPropertiesData];
+
+                // Filtro por región
+                const selectedRegion = filterRegion.value;
+                if (selectedRegion !== 'all') {
+                    filteredPropertiesData = filteredPropertiesData.filter(prop => prop.region === selectedRegion);
+                }
+
+                // Filtro por características especiales
+                const selectedSpecial = filterSpecial.value;
+                if (selectedSpecial !== 'all') {
+                    filteredPropertiesData = filteredPropertiesData.filter(prop => {
+                        if (selectedSpecial === 'cenote') return prop.specialFeature === 'cenote' || prop.descriptionShort.toLowerCase().includes('cenote') || prop.descriptionShort.toLowerCase().includes('laguna');
+                        if (selectedSpecial === 'playa') return prop.specialFeature === 'playa' || prop.descriptionShort.toLowerCase().includes('playa');
+                        if (selectedSpecial === 'carretera') return prop.specialFeature === 'carretera' || prop.descriptionShort.toLowerCase().includes('carretera');
+                        if (selectedSpecial === 'esquina') return prop.specialFeature === 'esquina' || prop.descriptionShort.toLowerCase().includes('esquina');
+                        if (selectedSpecial === 'centro') return prop.specialFeature === 'centro' || prop.region === 'Centro';
+                        if (selectedSpecial === 'premium') return prop.specialFeature === 'premium' || prop.featured;
+                        return true;
+                    });
+                }
+
+                // Filtros de precio y área
+                const priceMin = parseFloat(filterPriceMin.value);
+                const priceMax = parseFloat(filterPriceMax.value);
+                if (!isNaN(priceMin)) {
+                    filteredPropertiesData = filteredPropertiesData.filter(prop => prop.priceUSD >= priceMin);
+                }
+                if (!isNaN(priceMax)) {
+                    filteredPropertiesData = filteredPropertiesData.filter(prop => prop.priceUSD <= priceMax);
+                }
+
+                const areaMin = parseFloat(filterAreaMin.value);
+                const areaMax = parseFloat(filterAreaMax.value);
+                if (!isNaN(areaMin)) {
+                    filteredPropertiesData = filteredPropertiesData.filter(prop => prop.areaM2 >= areaMin);
+                }
+                if (!isNaN(areaMax)) {
+                    filteredPropertiesData = filteredPropertiesData.filter(prop => prop.areaM2 <= areaMax);
+                }
+
+                // Filtro por texto
+                const searchText = filterTextSearch.value.toLowerCase().trim();
+                if (searchText) {
+                    filteredPropertiesData = filteredPropertiesData.filter(prop =>
+                        (prop.name && prop.name.toLowerCase().includes(searchText)) ||
+                        (prop.descriptionShort && prop.descriptionShort.toLowerCase().includes(searchText)) ||
+                        (prop.location && prop.location.toLowerCase().includes(searchText)) ||
+                        (prop.manzana && prop.manzana.toLowerCase().includes(searchText))
+                    );
+                }
+                
+                // Mantener orden por prioridad
+                filteredPropertiesData.sort((a, b) => (a.priority || 999) - (b.priority || 999));
+                
+                renderCurrentPage();
+                updatePaginationControls();
+            }
+
+            // Función para mostrar detalles, ahora con el modal del mapa
+            window.showPropertyDetails = function(propertyId) {
+                const property = allPropertiesData.find(p => p.id === propertyId);
+                const modal = document.getElementById('mapModal');
+                const mapContainer = document.getElementById('modal-map-container');
+                
+                if (property && property.coordinates) {
+                    // Detener la animación del mapa pequeño si existe
+                    const miniMapId = `mini-map-${property.id}`;
+                    if(currentMapInstances[miniMapId] && currentMapInstances[miniMapId].animationInterval) {
+                        clearInterval(currentMapInstances[miniMapId].animationInterval);
+                    }
+                    
+                    // Limpiar el contenedor del modal antes de añadir un nuevo mapa
+                    mapContainer.innerHTML = ''; 
+                    
+                    // Mostrar el modal y cargar el mapa
+                    modal.style.display = 'flex';
+                    initFullMap('modal-map-container', property.coordinates, property.name);
+                } else {
+                    alert(`Ubicación de ${property ? property.name : 'la propiedad'} no disponible.`);
+                }
+            }
+
+            // Event listeners
+            applyFiltersBtn.addEventListener('click', applyFilters);
+            filterTextSearch.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    applyFilters();
+                }
+            });
+
+            clearFiltersBtn.addEventListener('click', () => {
+                filterRegion.value = 'all';
+                filterSpecial.value = 'all';
+                filterPriceMin.value = '';
+                filterPriceMax.value = '';
+                filterAreaMin.value = '';
+                filterAreaMax.value = '';
+                filterTextSearch.value = '';
+                applyFilters();
+            });
+
+            fetchProperties();
+        });
+
+        loadGoogleMapsScript();
+
+        // Lógica para cerrar el modal del mapa
+        const mapModal = document.getElementById('mapModal');
+        const closeModalBtn = mapModal.querySelector('.close-button');
+
+        closeModalBtn.addEventListener('click', () => {
+            mapModal.style.display = 'none';
+            if (mapAnimationInterval) {
+                clearInterval(mapAnimationInterval);
+                mapAnimationInterval = null;
+            }
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target === mapModal) {
+                mapModal.style.display = 'none';
+                if (mapAnimationInterval) {
+                    clearInterval(mapAnimationInterval);
+                    mapAnimationInterval = null;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,331 @@
+/* style.css - Estilos personalizados para Mayan Horizon */
+
+/* Estilos generales del cuerpo y fuentes, priorizando la paleta de colores de la marca */
+body {
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* Estilo para la barra de navegación fija */
+.ClaseHeaderBg {
+    background-color: rgba(255, 255, 255, 0.95); /* Más opaco para mejor contraste */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+/* Hero section con el fondo de video */
+.ClaseHeroVideoContainer {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.ClaseHeroVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+}
+
+.ClaseHeroOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Oscurecido un poco más */
+}
+
+/* Animación para el filamento (divisorio de secciones) */
+.ClaseFilamento {
+    animation: expand 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@keyframes expand {
+    0% {
+        transform: scaleX(0);
+    }
+    100% {
+        transform: scaleX(1);
+    }
+}
+
+/* Estilo para el efecto de máquina de escribir */
+.ClaseTypewriterText {
+    /* Asegura que el texto sea visible */
+    color: inherit; /* Hereda el color del padre, que es blanco/gris claro */
+    display: inline-block; /* Necesario para el efecto del cursor */
+    vertical-align: bottom; /* Alinea el cursor con la base del texto */
+    word-break: break-word; /* Permite que las palabras se rompan si son demasiado largas */
+}
+
+.ClaseTypewriterText.is-typing::after {
+    content: '|';
+    animation: blinkCaret 0.75s step-end infinite;
+    display: inline-block;
+    vertical-align: bottom;
+}
+
+/* Animación del cursor de la máquina de escribir */
+@keyframes blinkCaret {
+    from, to {
+        border-color: transparent;
+    }
+    50% {
+        border-color: #D4A017; /* Usar color de marca para el cursor (oroArena) */
+    }
+}
+
+/* Estilo para la sección de mapa */
+.ClaseMapaContainer {
+    width: 100%;
+    height: 550px; /* Altura fija para el mapa */
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    margin-top: 2rem;
+    position: relative; /* Necesario para posicionar controles */
+}
+
+/* Estilo para la sección de filosofía con degradado */
+.SeccionFilosofiaFondoDegradado {
+    background: linear-gradient(135deg, #002F5D 0%, #00A8B5 100%); /* profundoAzul a turquesaCaribe */
+}
+
+/* Estilos para el simulador de ROI */
+.ClaseRoiSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #D4A017; /* oroArena */
+    border-radius: 50%;
+    cursor: grab;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.ClaseRoiSlider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #D4A017; /* oroArena */
+    border-radius: 50%;
+    cursor: grab;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.ClaseRoiSelect {
+     border: 1px solid #D1D5DB;
+     border-radius: 0.375rem;
+     padding: 0.75rem 1rem;
+     font-size: 1rem;
+     width: 100%;
+     background-color: #FFFFFF;
+}
+.ClaseRoiSelect:focus {
+    border-color: #D4A017; /* oroArena */
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.2);
+}
+
+/* Estilos para el formulario de contacto */
+.ClaseFormularioContacto input,
+.ClaseFormularioContacto textarea {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+.ClaseFormularioContacto input::placeholder,
+.ClaseFormularioContacto textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+.ClaseFormularioContacto input:focus,
+.ClaseFormularioContacto textarea:focus {
+    border-color: #D4A017; /* oroArena */
+    box-shadow: 0 0 0 3px rgba(212, 160, 23, 0.3);
+}
+
+/* --- Estilos para el menú lateral de Redes Sociales (Desktop) --- */
+.ClaseSocialSidebar {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50; /* Por encima de otros elementos, pero debajo del header fijo */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem; /* Espacio entre los iconos */
+    padding: 0.5rem 0; /* Un poco de padding vertical */
+    border-radius: 0 10px 10px 0; /* Bordes redondeados solo a la derecha */
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+    background-color: rgba(255, 255, 255, 0.9); /* Fondo ligeramente transparente */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.ClaseSocialIcon {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: #4B4B4B; /* Color de texto inicial (piedraGris) */
+    background-color: transparent; /* Fondo transparente por defecto */
+    padding: 0.75rem 1rem; /* Espacio interno */
+    border-radius: 0 8px 8px 0; /* Bordes redondeados */
+    transition: all 0.3s ease-in-out; /* Transición suave para todos los cambios */
+    overflow: hidden; /* Oculta el texto extra hasta que se expande */
+    width: 3.5rem; /* Ancho inicial solo para el icono */
+    white-space: nowrap; /* Evita que el texto de la etiqueta se envuelva */
+}
+
+.ClaseSocialIcon i {
+    font-size: 1.5rem; /* Tamaño de los iconos */
+    margin-right: 0.75rem; /* Espacio entre el icono y el texto al expandirse */
+    color: #002F5D; /* Color del icono por defecto (profundoAzul) */
+    transition: all 0.3s ease-in-out;
+}
+
+.ClaseSocialIcon span {
+    font-weight: 600; /* Semibold */
+    font-size: 1rem;
+    opacity: 0; /* Inicialmente oculto */
+    transition: opacity 0.2s ease-in-out; /* Transición para la opacidad del texto */
+}
+
+/* Hover effects (Desktop) */
+.ClaseSocialIcon:hover {
+    width: 10rem; /* Ancho expandido para mostrar el texto */
+    color: white; /* Texto blanco al hacer hover */
+    padding-left: 0.75rem; /* Ajustar padding para centrar mejor el icono inicial */
+}
+
+.ClaseSocialIcon:hover i {
+    color: white; /* Icono blanco al hacer hover */
+}
+
+.ClaseSocialIcon:hover span {
+    opacity: 1; /* Muestra el texto */
+    margin-left: 0; /* Asegura que no haya un margen fantasma */
+}
+
+/* Colores específicos para cada red social al hacer hover */
+.ClaseSocialIcon.facebook:hover {
+    background-color: #3b5998; /* Facebook Blue */
+}
+.ClaseSocialIcon.instagram:hover {
+    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); /* Instagram Gradient */
+}
+.ClaseSocialIcon.linkedin:hover {
+    background-color: #0077B5; /* LinkedIn Blue */
+}
+.ClaseSocialIcon.x-twitter:hover {
+    background-color: #1DA1F2; /* X (Twitter) Blue */
+}
+.ClaseSocialIcon.youtube:hover {
+    background-color: #FF0000; /* YouTube Red */
+}
+
+/* --- Mobile Menu Toggle (Hamburger) --- */
+.ClaseMenuToggle {
+    display: none; /* Hidden by default on desktop */
+    cursor: pointer;
+    font-size: 2rem;
+    color: #002F5D; /* profundoAzul */
+    z-index: 1000; /* Ensure it's above other content */
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: color 0.3s ease;
+}
+
+.ClaseMenuToggle:hover {
+    color: #D4A017; /* oroArena */
+}
+
+/* --- Mobile Navigation Menu Panel --- */
+.ClaseMobileNav {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: rgba(0, 47, 93, 0.95); /* profundoAzul con transparencia */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transform: translateX(-100%); /* Start off-screen */
+    transition: transform 0.3s ease-in-out;
+}
+
+.ClaseMobileNav.is-open {
+    transform: translateX(0); /* Slide in */
+    display: flex; /* Show when open */
+}
+
+.ClaseMobileNav a {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+    padding: 1rem 0;
+    transition: color 0.3s ease;
+}
+
+.ClaseMobileNav a:hover {
+    color: #D4A017; /* oroArena */
+}
+
+/* --- Media Queries for Responsiveness --- */
+@media (max-width: 768px) {
+    /* Muestra el botón de hamburguesa y oculta la navegación de escritorio */
+    .ClaseDesktopNav {
+        display: none; /* Hide desktop nav on mobile */
+    }
+    .ClaseMenuToggle {
+        display: block; /* Show hamburger on mobile */
+    }
+
+    /* Redes Sociales: se transforman en una barra inferior */
+    .ClaseSocialSidebar {
+        flex-direction: row; /* Stack horizontally */
+        width: 100%;
+        left: 0;
+        right: 0;
+        top: auto; /* Remove top positioning */
+        bottom: 0; /* Fix to bottom */
+        padding: 0.75rem 0; /* Adjust padding */
+        border-radius: 0; /* Remove rounded corners */
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2); /* Shadow on top */
+        background-color: rgba(255, 255, 255, 0.95); /* More opaque */
+        justify-content: space-around; /* Distribute icons evenly */
+        align-items: center;
+        /* Asegura que el z-index sea menor que el del menú móvil si ambos están abiertos */
+        z-index: 40;
+    }
+
+    .ClaseSocialIcon {
+        width: auto; /* Auto width */
+        padding: 0.5rem; /* Smaller padding */
+        border-radius: 50%; /* Make icons circular */
+        flex-grow: 1; /* Permite que los íconos ocupen el espacio disponible */
+        justify-content: center; /* Centra el ícono */
+    }
+
+    .ClaseSocialIcon span {
+        display: none; /* Hide text on mobile */
+    }
+
+    .ClaseSocialIcon i {
+        margin-right: 0; /* No margin next to text */
+        font-size: 1.2rem; /* Reduce el tamaño del ícono en móvil */
+    }
+
+    .ClaseSocialIcon:hover {
+        width: auto; /* No expansion on hover for mobile, just color change */
+        padding: 0.5rem;
+    }
+}
