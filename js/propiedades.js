@@ -32,15 +32,40 @@ document.addEventListener('DOMContentLoaded', () => {
     let filteredProperties = [];
     let allPropertiesData = [];
 
-    // Función para cargar los datos de propiedades desde el archivo properties.php
+    // Función para cargar los datos de propiedades desde la API
     async function fetchProperties() {
+        if (propiedadesGrid) {
+            // Muestra un mensaje de carga mientras se obtienen los datos
+            propiedadesGrid.innerHTML = `<p class="text-center col-span-full text-gray-500">Cargando propiedades...</p>`;
+        }
+
         try {
-            const response = await fetch('properties.php');
+            // Llama al nuevo endpoint de la API
+            const response = await fetch('api_propiedades.php');
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
             }
-            allPropertiesData = await response.json();
-            applyFilters();
+            const properties = await response.json();
+
+            // Parsea los datos de la API para que coincidan con la estructura que el frontend espera.
+            // Esto corrige el 'data structure mismatch' señalado en la revisión.
+            allPropertiesData = properties.map(p => ({
+                id: parseInt(p.id, 10),
+                title: p.titulo,
+                location: p.region, // Usamos 'region' como la ubicación principal para filtros.
+                locationDetails: `${p.region || ''}, ${p.manzana || ''}, ${p.lote || ''}`.replace(/, $/, '').trim(),
+                areaM2: parseFloat(p.m2),
+                priceUSD: parseFloat(p.precio), // Campo numérico para filtros.
+                total_price: `${parseFloat(p.precio).toLocaleString('en-US')} ${p.moneda}`, // Campo de texto para mostrar.
+                coordinates: {
+                    lat: p.latitud ? parseFloat(p.latitud) : null,
+                    lng: p.longitud ? parseFloat(p.longitud) : null
+                },
+                descripcion: p.descripcion,
+                estatus: p.estatus
+            }));
+
+            applyFilters(); // Renderiza las propiedades con los datos cargados
         } catch (error) {
             console.error('Error al cargar los datos de propiedades:', error);
             if(propiedadesGrid) {
@@ -48,24 +73,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
+
     // Función para aplicar filtros y actualizar la visualización
     function applyFilters() {
         if (!allPropertiesData) return;
         filteredProperties = allPropertiesData.filter(property => {
-            const regionMatch = filterRegion.value === 'all' || property.location.includes(filterRegion.value);
-            const specialMatch = filterSpecial.value === 'all' || (property.specialFeatures && property.specialFeatures.includes(filterSpecial.value));
-            
-            const priceMatch = (filterPriceMin.value === '' || property.priceUSD >= parseFloat(filterPriceMin.value)) &&
-                               (filterPriceMax.value === '' || property.priceUSD <= parseFloat(filterPriceMax.value));
-            
-            const areaMatch = (filterAreaMin.value === '' || property.areaM2 >= parseFloat(filterAreaMin.value)) &&
-                              (filterAreaMax.value === '' || property.areaM2 <= parseFloat(filterAreaMax.value));
-            
-            const textMatch = filterTextSearch.value === '' || 
-                              Object.values(property).some(value => 
-                                  String(value).toLowerCase().includes(filterTextSearch.value.toLowerCase())
-                              );
+            // Se usa 'location' para el filtro de región, que ahora mapea a 'p.region'.
+            const regionMatch = !filterRegion || filterRegion.value === 'all' || (property.location && property.location.includes(filterRegion.value));
+            const specialMatch = !filterSpecial || filterSpecial.value === 'all' || (property.specialFeatures && property.specialFeatures.includes(filterSpecial.value));
+
+            // El filtro de precio ahora usa la propiedad numérica 'priceUSD'.
+            const priceMatch = (!filterPriceMin || filterPriceMin.value === '' || property.priceUSD >= parseFloat(filterPriceMin.value)) &&
+                               (!filterPriceMax || filterPriceMax.value === '' || property.priceUSD <= parseFloat(filterPriceMax.value));
+
+            // El filtro de área usa 'areaM2'.
+            const areaMatch = (!filterAreaMin || filterAreaMin.value === '' || property.areaM2 >= parseFloat(filterAreaMin.value)) &&
+                              (!filterAreaMax || filterAreaMax.value === '' || property.areaM2 <= parseFloat(filterAreaMax.value));
+
+            // La búsqueda de texto ahora busca en el 'title' y 'descripcion'.
+            const textMatch = !filterTextSearch || filterTextSearch.value === '' ||
+                              (property.title && property.title.toLowerCase().includes(filterTextSearch.value.toLowerCase())) ||
+                              (property.descripcion && property.descripcion.toLowerCase().includes(filterTextSearch.value.toLowerCase()));
 
             return regionMatch && specialMatch && priceMatch && areaMatch && textMatch;
         });
@@ -87,32 +115,36 @@ document.addEventListener('DOMContentLoaded', () => {
             paginatedProperties.forEach(property => {
                 const card = document.createElement('div');
                 card.className = 'property-card';
+                // Se actualiza el HTML para usar la nueva estructura de datos ('id', 'title', 'total_price').
                 card.innerHTML = `
                     <div class="property-card-media">
-                        <div class="mini-map-embed" id="map-${property.ID}"></div>
-                        <span class="map-number">${property.ID}</span>
+                        <div class="mini-map-embed" id="map-${property.id}"></div>
+                        <span class="map-number">${property.id}</span>
                     </div>
                     <div class="property-card-info">
                         <div>
-                            <h3 class="property-card-title">${property.location}</h3>
+                            <h3 class="property-card-title">${property.title}</h3>
                             <p class="property-card-location"><i class="fas fa-map-marker-alt"></i> ${property.locationDetails}</p>
                             <p class="property-card-area"><i class="fas fa-ruler-combined"></i> ${property.areaM2} m²</p>
                         </div>
-                        <p class="property-card-price">$${property.priceUSD.toLocaleString('en-US')} USD</p>
+                        <p class="property-card-price">$${property.total_price}</p>
                         <a href="#SeccionContacto" class="property-card-button">Me interesa</a>
                     </div>
                 `;
                 propiedadesGrid.appendChild(card);
-                
+
                 // Asegurar que el mapa se inicialice una vez cargada la API
-                if (window.googleMapsApiLoaded) {
-                    window.initMiniMap(`map-${property.ID}`, property.coordinates, property.polygonCoords, property.name);
-                } else {
+                if (window.googleMapsApiLoaded && property.coordinates && property.coordinates.lat) {
+                    window.initMiniMap(`map-${property.id}`, property.coordinates, null, property.title);
+                } else if (property.coordinates && property.coordinates.lat) {
+                    if (!window.pendingMapInitializations) {
+                        window.pendingMapInitializations = [];
+                    }
                     window.pendingMapInitializations.push({
-                        mapDivId: `map-${property.ID}`,
+                        mapDivId: `map-${property.id}`,
                         coordinates: property.coordinates,
-                        polygonCoords: property.polygonCoords,
-                        name: property.name
+                        polygonCoords: null,
+                        name: property.title
                     });
                 }
             });
@@ -131,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
              propertyCount.textContent = `Mostrando ${filteredProperties.length} propiedades.`;
         }
     }
-    
+
     // Lógica de los botones de paginación
     const prevPageBtn = document.getElementById('prev-page-btn');
     const nextPageBtn = document.getElementById('next-page-btn');
@@ -154,12 +186,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // Lógica de los botones de filtros
     if (applyFiltersBtn) {
         applyFiltersBtn.addEventListener('click', applyFilters);
     }
-    
+
     if (clearFiltersBtn) {
         clearFiltersBtn.addEventListener('click', () => {
             if (filterRegion) filterRegion.value = 'all';
@@ -220,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showImage(currentImageIndex + 1);
         });
     }
-    
+
     function createCarouselImages(images) {
         if (!carouselSlides) return;
         carouselSlides.innerHTML = '';
@@ -231,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
             carouselSlides.appendChild(img);
         });
     }
-    
+
     function showImage(index) {
         if (!carouselSlides) return;
         const totalImages = carouselSlides.children.length;
@@ -246,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         carouselSlides.style.transform = `translateX(${-currentImageIndex * 100}%)`;
     }
-    
+
     // Iniciar el proceso de carga de propiedades
     fetchProperties();
 });
