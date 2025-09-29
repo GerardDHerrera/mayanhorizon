@@ -1,11 +1,11 @@
 <?php
-// api_propiedades.php
+// apiPropiedades.php
 
-// --- Configuración de la Base de Datos ---
-$db_host = 'localhost';
-$db_user = 'root';
-$db_pass = ''; // Asume una contraseña vacía para un entorno de desarrollo local. ¡Cámbiala en producción!
-$db_name = 'mayanhorizon_db';
+// --- Configuración de la Base de Datos (usando camelCase) ---
+$dbHost = 'localhost';
+$dbUser = 'root';
+$dbPass = ''; // Asume una contraseña vacía para un entorno de desarrollo local. ¡Cámbiala en producción!
+$dbName = 'mayanhorizon'; // Actualizado según la solicitud
 
 // --- Cabeceras para la respuesta JSON ---
 header('Content-Type: application/json');
@@ -14,7 +14,7 @@ header('Access-Control-Allow-Origin: *'); // Permite el acceso desde cualquier o
 // --- Conexión a la Base de Datos ---
 try {
     // Se utiliza PDO para una conexión más segura y versátil
-    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_user, $db_pass);
+    $pdo = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPass);
 
     // Configurar PDO para que lance excepciones en caso de error
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

@@ -40,23 +40,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            // Llama al nuevo endpoint de la API
-            const response = await fetch('api_propiedades.php');
+            // Llama al nuevo endpoint de la API con el nombre corregido
+            const response = await fetch('apiPropiedades.php');
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
             }
             const properties = await response.json();
 
             // Parsea los datos de la API para que coincidan con la estructura que el frontend espera.
-            // Esto corrige el 'data structure mismatch' señalado en la revisión.
             allPropertiesData = properties.map(p => ({
                 id: parseInt(p.id, 10),
                 title: p.titulo,
-                location: p.region, // Usamos 'region' como la ubicación principal para filtros.
+                location: p.region,
                 locationDetails: `${p.region || ''}, ${p.manzana || ''}, ${p.lote || ''}`.replace(/, $/, '').trim(),
                 areaM2: parseFloat(p.m2),
-                priceUSD: parseFloat(p.precio), // Campo numérico para filtros.
-                total_price: `${parseFloat(p.precio).toLocaleString('en-US')} ${p.moneda}`, // Campo de texto para mostrar.
+                priceUSD: parseFloat(p.precio),
+                totalPrice: `${parseFloat(p.precio).toLocaleString('en-US')} ${p.moneda}`, // Corregido a camelCase
                 coordinates: {
                     lat: p.latitud ? parseFloat(p.latitud) : null,
                     lng: p.longitud ? parseFloat(p.longitud) : null
@@ -78,19 +77,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyFilters() {
         if (!allPropertiesData) return;
         filteredProperties = allPropertiesData.filter(property => {
-            // Se usa 'location' para el filtro de región, que ahora mapea a 'p.region'.
             const regionMatch = !filterRegion || filterRegion.value === 'all' || (property.location && property.location.includes(filterRegion.value));
             const specialMatch = !filterSpecial || filterSpecial.value === 'all' || (property.specialFeatures && property.specialFeatures.includes(filterSpecial.value));
-
-            // El filtro de precio ahora usa la propiedad numérica 'priceUSD'.
             const priceMatch = (!filterPriceMin || filterPriceMin.value === '' || property.priceUSD >= parseFloat(filterPriceMin.value)) &&
                                (!filterPriceMax || filterPriceMax.value === '' || property.priceUSD <= parseFloat(filterPriceMax.value));
-
-            // El filtro de área usa 'areaM2'.
             const areaMatch = (!filterAreaMin || filterAreaMin.value === '' || property.areaM2 >= parseFloat(filterAreaMin.value)) &&
                               (!filterAreaMax || filterAreaMax.value === '' || property.areaM2 <= parseFloat(filterAreaMax.value));
-
-            // La búsqueda de texto ahora busca en el 'title' y 'descripcion'.
             const textMatch = !filterTextSearch || filterTextSearch.value === '' ||
                               (property.title && property.title.toLowerCase().includes(filterTextSearch.value.toLowerCase())) ||
                               (property.descripcion && property.descripcion.toLowerCase().includes(filterTextSearch.value.toLowerCase()));
@@ -115,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             paginatedProperties.forEach(property => {
                 const card = document.createElement('div');
                 card.className = 'property-card';
-                // Se actualiza el HTML para usar la nueva estructura de datos ('id', 'title', 'total_price').
+                // Se actualiza el HTML para usar la nueva estructura de datos (ej. totalPrice)
                 card.innerHTML = `
                     <div class="property-card-media">
                         <div class="mini-map-embed" id="map-${property.id}"></div>
@@ -127,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p class="property-card-location"><i class="fas fa-map-marker-alt"></i> ${property.locationDetails}</p>
                             <p class="property-card-area"><i class="fas fa-ruler-combined"></i> ${property.areaM2} m²</p>
                         </div>
-                        <p class="property-card-price">$${property.total_price}</p>
+                        <p class="property-card-price">$${property.totalPrice}</p>
                         <a href="#SeccionContacto" class="property-card-button">Me interesa</a>
                     </div>
                 `;
