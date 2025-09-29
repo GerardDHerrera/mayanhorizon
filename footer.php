@@ -1,6 +1,5 @@
 <?php
-// footer.php - Contiene la sección de contacto, el botón de WhatsApp y los scripts JS.
-// Aquí se incluyen los enlaces a los archivos JavaScript externos.
+// footer.php - Contiene la sección de contacto, el pie de página y los scripts JS.
 ?>
     <div class="h-2 w-full bg-profundoAzul ClaseFilamento origin-left"></div>
 
@@ -24,7 +23,7 @@
 
     <footer class="bg-piedraGris text-white py-8">
         <div class="container mx-auto px-6 text-center text-sm">
-            <p>&copy; 2025 Mayan Horizon. Todos los derechos reservados.</p>
+            <p>&copy; <?php echo date("Y"); ?> Mayan Horizon. Todos los derechos reservados.</p>
             <p class="mt-2 text-gray-400">Diseñado con <span class="text-red-500">❤️</span> en la Riviera Maya.</p>
         </div>
     </footer>
@@ -33,6 +32,7 @@
         <img src="Imagenes/WhatsApp.png" alt="WhatsApp" class="w-16 h-16 rounded-full shadow-lg">
     </a>
 
+    <!-- Scripts de JavaScript -->
     <script src="js/script.js"></script>
     <script src="js/propiedades.js"></script>
 

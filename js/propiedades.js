@@ -35,36 +35,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función para cargar los datos de propiedades desde la API
     async function fetchProperties() {
         if (propiedadesGrid) {
-            // Muestra un mensaje de carga mientras se obtienen los datos
             propiedadesGrid.innerHTML = `<p class="text-center col-span-full text-gray-500">Cargando propiedades...</p>`;
         }
 
         try {
-            // Llama al nuevo endpoint de la API con el nombre corregido
             const response = await fetch('apiPropiedades.php');
             if (!response.ok) {
                 throw new Error(`Error HTTP: ${response.status}`);
             }
-            const properties = await response.json();
+            // Se asignan directamente los datos de la API, eliminando la capa de mapeo.
+            allPropertiesData = await response.json();
 
-            // Parsea los datos de la API para que coincidan con la estructura que el frontend espera.
-            allPropertiesData = properties.map(p => ({
-                id: parseInt(p.id, 10),
-                title: p.titulo,
-                location: p.region,
-                locationDetails: `${p.region || ''}, ${p.manzana || ''}, ${p.lote || ''}`.replace(/, $/, '').trim(),
-                areaM2: parseFloat(p.m2),
-                priceUSD: parseFloat(p.precio),
-                totalPrice: `${parseFloat(p.precio).toLocaleString('en-US')} ${p.moneda}`, // Corregido a camelCase
-                coordinates: {
-                    lat: p.latitud ? parseFloat(p.latitud) : null,
-                    lng: p.longitud ? parseFloat(p.longitud) : null
-                },
-                descripcion: p.descripcion,
-                estatus: p.estatus
-            }));
+            // Es buena práctica asegurar que los tipos de datos numéricos sean correctos.
+            allPropertiesData.forEach(p => {
+                p.precio = parseFloat(p.precio);
+                p.m2 = parseFloat(p.m2);
+                p.latitud = p.latitud ? parseFloat(p.latitud) : null;
+                p.longitud = p.longitud ? parseFloat(p.longitud) : null;
+            });
 
-            applyFilters(); // Renderiza las propiedades con los datos cargados
+            applyFilters();
         } catch (error) {
             console.error('Error al cargar los datos de propiedades:', error);
             if(propiedadesGrid) {
@@ -73,27 +63,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Función para aplicar filtros y actualizar la visualización
+    // Función para aplicar filtros, ahora usando los nombres de campo de la API
     function applyFilters() {
         if (!allPropertiesData) return;
         filteredProperties = allPropertiesData.filter(property => {
-            const regionMatch = !filterRegion || filterRegion.value === 'all' || (property.location && property.location.includes(filterRegion.value));
-            const specialMatch = !filterSpecial || filterSpecial.value === 'all' || (property.specialFeatures && property.specialFeatures.includes(filterSpecial.value));
-            const priceMatch = (!filterPriceMin || filterPriceMin.value === '' || property.priceUSD >= parseFloat(filterPriceMin.value)) &&
-                               (!filterPriceMax || filterPriceMax.value === '' || property.priceUSD <= parseFloat(filterPriceMax.value));
-            const areaMatch = (!filterAreaMin || filterAreaMin.value === '' || property.areaM2 >= parseFloat(filterAreaMin.value)) &&
-                              (!filterAreaMax || filterAreaMax.value === '' || property.areaM2 <= parseFloat(filterAreaMax.value));
+            const regionMatch = !filterRegion || filterRegion.value === 'all' || (property.region && property.region.includes(filterRegion.value));
+            // Nota: 'specialFeatures' no viene de la API. Se omite el filtro o se debe añadir a la DB.
+            // const specialMatch = !filterSpecial || filterSpecial.value === 'all' || (property.specialFeatures && property.specialFeatures.includes(filterSpecial.value));
+            const priceMatch = (!filterPriceMin || filterPriceMin.value === '' || property.precio >= parseFloat(filterPriceMin.value)) &&
+                               (!filterPriceMax || filterPriceMax.value === '' || property.precio <= parseFloat(filterPriceMax.value));
+            const areaMatch = (!filterAreaMin || filterAreaMin.value === '' || property.m2 >= parseFloat(filterAreaMin.value)) &&
+                              (!filterAreaMax || filterAreaMax.value === '' || property.m2 <= parseFloat(filterAreaMax.value));
             const textMatch = !filterTextSearch || filterTextSearch.value === '' ||
-                              (property.title && property.title.toLowerCase().includes(filterTextSearch.value.toLowerCase())) ||
+                              (property.titulo && property.titulo.toLowerCase().includes(filterTextSearch.value.toLowerCase())) ||
                               (property.descripcion && property.descripcion.toLowerCase().includes(filterTextSearch.value.toLowerCase()));
 
-            return regionMatch && specialMatch && priceMatch && areaMatch && textMatch;
+            return regionMatch && priceMatch && areaMatch && textMatch;
         });
         currentPage = 1;
         renderProperties();
     }
 
-    // Función para renderizar las propiedades en la página actual
+    // Función para renderizar las propiedades, usando los nombres de campo de la API
     function renderProperties() {
         if (!propiedadesGrid) return;
         propiedadesGrid.innerHTML = '';
@@ -107,7 +98,11 @@ document.addEventListener('DOMContentLoaded', () => {
             paginatedProperties.forEach(property => {
                 const card = document.createElement('div');
                 card.className = 'property-card';
-                // Se actualiza el HTML para usar la nueva estructura de datos (ej. totalPrice)
+
+                // Se computan los detalles para la vista directamente desde los datos de la API
+                const locationDetails = `${property.region || ''}, ${property.manzana || ''}, ${property.lote || ''}`.replace(/, $/, '').trim();
+                const totalPrice = `${property.precio.toLocaleString('en-US')} ${property.moneda}`;
+
                 card.innerHTML = `
                     <div class="property-card-media">
                         <div class="mini-map-embed" id="map-${property.id}"></div>
@@ -115,28 +110,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="property-card-info">
                         <div>
-                            <h3 class="property-card-title">${property.title}</h3>
-                            <p class="property-card-location"><i class="fas fa-map-marker-alt"></i> ${property.locationDetails}</p>
-                            <p class="property-card-area"><i class="fas fa-ruler-combined"></i> ${property.areaM2} m²</p>
+                            <h3 class="property-card-title">${property.titulo}</h3>
+                            <p class="property-card-location"><i class="fas fa-map-marker-alt"></i> ${locationDetails}</p>
+                            <p class="property-card-area"><i class="fas fa-ruler-combined"></i> ${property.m2} m²</p>
                         </div>
-                        <p class="property-card-price">$${property.totalPrice}</p>
+                        <p class="property-card-price">$${totalPrice}</p>
                         <a href="#SeccionContacto" class="property-card-button">Me interesa</a>
                     </div>
                 `;
                 propiedadesGrid.appendChild(card);
 
-                // Asegurar que el mapa se inicialice una vez cargada la API
-                if (window.googleMapsApiLoaded && property.coordinates && property.coordinates.lat) {
-                    window.initMiniMap(`map-${property.id}`, property.coordinates, null, property.title);
-                } else if (property.coordinates && property.coordinates.lat) {
+                const coordinates = (property.latitud && property.longitud) ? { lat: property.latitud, lng: property.longitud } : null;
+                if (window.googleMapsApiLoaded && coordinates) {
+                    window.initMiniMap(`map-${property.id}`, coordinates, null, property.titulo);
+                } else if (coordinates) {
                     if (!window.pendingMapInitializations) {
                         window.pendingMapInitializations = [];
                     }
                     window.pendingMapInitializations.push({
                         mapDivId: `map-${property.id}`,
-                        coordinates: property.coordinates,
+                        coordinates: coordinates,
                         polygonCoords: null,
-                        name: property.title
+                        name: property.titulo
                     });
                 }
             });
